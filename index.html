@@ -7,7 +7,31 @@
     <title>Vite App</title>
   </head>
   <body>
-    <div id="app"></div>
+    <form id="form-input">
+      <fieldset>
+        <legend>Values</legend>
+        <input type="number" name="viewport-0">
+        <input type="number" name="size-0">
+        <input type="number" name="viewport-1">
+        <input type="number" name="size-1">
+      </fieldset>
+      <fieldset>
+        <legend>Units</legend>
+        <input type="radio" name="unit" value="px" id="px">
+        <label for="pc">px</label>
+        <input type="radio" name="unit" value="rem" id="rem">
+        <label for="rem">rem</label>
+        <input type="radio" name="unit" value="em" id="em">
+        <label for="em">em</label>
+      </fieldset>
+      <fieldset>
+        <legend>Conversion to px</legend>
+        <input type="number" name="to-px-conversion" id="to-px-conversion">
+      </fieldset>
+    </form>
+    <div id="graph"></div>
+    <div id="css-output"></div>
+    <div id="sample"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

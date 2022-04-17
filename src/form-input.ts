@@ -1,0 +1,96 @@
+import { FormInput, StateObject } from "./ts"
+
+const model: {
+  set?: (newData: any) => void,
+  initialized: boolean
+} = {
+  initialized: false
+}
+
+// Form
+const form = <FormInput>document.getElementById('form-input')
+
+// function formUpdate(newData: StateObject) {
+//   form['size-0'].value = newData.sizes[0][1].toString()
+//   form['size-1'].value = newData.sizes[1][1].toString()
+//   form['viewport-0'].value = newData.sizes[0][0].toString()
+//   form['viewport-1'].value = newData.sizes[1][0].toString()
+
+//   // form['unit'].value = newData.unit.toString()
+//   // Array.from(form['unit']).find(radioNode => radioNode.value === newData.unit)
+//   form['unit'].forEach(radioNode => radioNode.value === newData.unit
+//     ? radioNode.checked = true
+//     : radioNode.checked = false)
+
+//   form['to-px-conversion'].value = newData.toPxConversion.toString()
+// }
+
+// User input
+form.addEventListener('change', e => {
+  const currentTarget = <typeof e.currentTarget & HTMLInputElement>e.target
+
+  if (currentTarget === null || typeof model.set === 'undefined') {
+    console.log('wololoOA')
+    return
+  }
+  const newDataObject = <StateObject>{}
+
+  console.log(currentTarget.getAttribute('name'))
+
+  switch(currentTarget.getAttribute('name')) {
+    case 'size-0':
+    case 'size-1':
+    case 'viewport-0':
+    case 'viewport-1':
+      const target = <FormInput>e.currentTarget
+      newDataObject.sizes = [
+        [parseInt(target['viewport-0'].value), parseInt(target['size-0'].value)],
+        [parseInt(target['viewport-1'].value), parseInt(target['size-1'].value)]
+      ]
+      break
+    case 'to-px-conversion':
+      newDataObject.toPxConversion = parseFloat(currentTarget.value)
+      break
+    case 'unit':
+      newDataObject.unit = <'px' | 'rem' | 'em'>currentTarget.value
+      break
+    default:
+      return
+  }
+
+  if (Object.values(newDataObject).length > 0) {
+
+    console.log('SET')
+    model.set(newDataObject)
+  }
+})
+
+// Update
+function update(newData: StateObject) {
+  form['size-0'].value = newData.sizes[0][1].toString()
+  form['size-1'].value = newData.sizes[1][1].toString()
+  form['viewport-0'].value = newData.sizes[0][0].toString()
+  form['viewport-1'].value = newData.sizes[1][0].toString()
+
+  // form['unit'].value = newData.unit.toString()
+  // Array.from(form['unit']).find(radioNode => radioNode.value === newData.unit)
+  form['unit'].forEach(radioNode => radioNode.value === newData.unit
+    ? radioNode.checked = true
+    : radioNode.checked = false)
+
+  form['to-px-conversion'].value = newData.toPxConversion.toString()
+
+  return newData
+}
+
+
+export default {
+  initModel(thisModel: { set(newData: StateObject): void, get(): StateObject }) {
+    model.set = thisModel.set
+    model.initialized = true
+    Object.freeze(model)
+
+    update(thisModel.get())
+  },
+  update
+}
