@@ -1,4 +1,4 @@
-import { FormInput, StateObject } from "./ts"
+import { CSSSizeUnits, CSSViewportUnits, FormInput, StateObject } from "./ts"
 
 const model: {
   set?: (newData: any) => void,
@@ -10,32 +10,14 @@ const model: {
 // Form
 const form = <FormInput>document.getElementById('form-input')
 
-// function formUpdate(newData: StateObject) {
-//   form['size-0'].value = newData.sizes[0][1].toString()
-//   form['size-1'].value = newData.sizes[1][1].toString()
-//   form['viewport-0'].value = newData.sizes[0][0].toString()
-//   form['viewport-1'].value = newData.sizes[1][0].toString()
-
-//   // form['unit'].value = newData.unit.toString()
-//   // Array.from(form['unit']).find(radioNode => radioNode.value === newData.unit)
-//   form['unit'].forEach(radioNode => radioNode.value === newData.unit
-//     ? radioNode.checked = true
-//     : radioNode.checked = false)
-
-//   form['to-px-conversion'].value = newData.toPxConversion.toString()
-// }
-
 // User input
 form.addEventListener('change', e => {
   const currentTarget = <typeof e.currentTarget & HTMLInputElement>e.target
 
   if (currentTarget === null || typeof model.set === 'undefined') {
-    console.log('wololoOA')
     return
   }
   const newDataObject = <StateObject>{}
-
-  console.log(currentTarget.getAttribute('name'))
 
   switch(currentTarget.getAttribute('name')) {
     case 'size-0':
@@ -51,16 +33,17 @@ form.addEventListener('change', e => {
     case 'to-px-conversion':
       newDataObject.toPxConversion = parseFloat(currentTarget.value)
       break
-    case 'unit':
-      newDataObject.unit = <'px' | 'rem' | 'em'>currentTarget.value
+    case 'sizeUnit':
+      newDataObject.sizeUnit = <CSSSizeUnits>currentTarget.value
+      break
+    case 'viewportUnit':
+      newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
       break
     default:
       return
   }
 
   if (Object.values(newDataObject).length > 0) {
-
-    console.log('SET')
     model.set(newDataObject)
   }
 })
@@ -74,7 +57,11 @@ function update(newData: StateObject) {
 
   // form['unit'].value = newData.unit.toString()
   // Array.from(form['unit']).find(radioNode => radioNode.value === newData.unit)
-  form['unit'].forEach(radioNode => radioNode.value === newData.unit
+  form['size-unit'].forEach(radioNode => radioNode.value === newData.sizeUnit
+    ? radioNode.checked = true
+    : radioNode.checked = false)
+
+  form['viewport-unit'].forEach(radioNode => radioNode.value === newData.viewportUnit
     ? radioNode.checked = true
     : radioNode.checked = false)
 

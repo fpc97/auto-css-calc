@@ -2,7 +2,8 @@ import { StateObject } from "./ts"
 import { Observable } from "./utils"
 
 const state: StateObject = Object.seal({
-  unit: 'px',
+  sizeUnit: 'px',
+  viewportUnit: 'vw',
   sizes: [
     [200, 14],
     [400, 21]
