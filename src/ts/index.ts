@@ -1,9 +1,13 @@
-export type KeysOrType<T> = T extends {[k: string | number | symbol]: unknown} ? {[K in keyof T]: any} : T
+export type KeysOrType<T> = T extends {[k: string | number | symbol]: unknown}
+  ? {[K in keyof T]: T[K]}
+  : T
+
+export type CSSUnits = 'px' | 'rem' | 'em'
 
 export type DimensionUnitPair = [number, number]
 
 export type StateObject = {
-  unit: 'px' | 'rem' | 'em';
+  unit: CSSUnits;
   sizes: [DimensionUnitPair, DimensionUnitPair];
   toPxConversion: number;
 }
