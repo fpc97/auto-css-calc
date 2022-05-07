@@ -1,4 +1,4 @@
-import { CSSSizeUnits, StateObject } from "./ts";
+import { CSSSizeUnits, DimensionUnitPair, StateObject } from "./ts";
 import { clamp, getArrayPairsOf } from "./utils";
 import { LinearFunction, Point } from "./utils/linear-algebra";
 
@@ -183,6 +183,9 @@ export default class GraphCanvas{
   private get gridHeight() {
     return this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM
   }
+
+  // Change listeners
+  private changeListeners: ((newData: Partial<StateObject>) => void)[];
  
   constructor(
     canvasHTMLElement: HTMLCanvasElement,
@@ -242,9 +245,13 @@ export default class GraphCanvas{
 
     this.extendIntervalId = null
 
+    this.changeListeners = []
+
     window.addEventListener('mousemove', this.handleMouseMove.bind(this))
     window.addEventListener('mousedown', this.handleMouseDown.bind(this))
     window.addEventListener('mouseup', this.handleMouseUp.bind(this))
+
+    this.refresh()
   }
 
   /**
@@ -545,6 +552,15 @@ export default class GraphCanvas{
   }
 
   private handleMouseUp() {
+    if (this.changeListeners.length > 0) {
+      const newSizes: [DimensionUnitPair, DimensionUnitPair] = [
+        [this.p1.x, this.p1.y],
+        [this.p2.x, this.p2.y]
+      ]
+
+      this.changeListeners.map(cb => cb({ sizes: newSizes }))
+    }
+    
     if (this.isPointSelected) {
       this.isPointSelected = false
     }
@@ -800,6 +816,10 @@ export default class GraphCanvas{
         'right'
       )
     }
+  }
+
+  public set onChange(cb: (newData: Partial<StateObject>) => void) {
+    this.changeListeners.push(cb)
   }
 
   public refresh() {

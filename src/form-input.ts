@@ -1,10 +1,7 @@
-import { CSSSizeUnits, CSSViewportUnits, FormInput, StateObject, Store } from "./ts"
+import { CSSSizeUnits, CSSViewportUnits, FormInput, LocalModel, StateObject, Store } from "./ts"
 
-const model: {
-  set?: (newData: any) => void,
-  initialized: boolean
-} = {
-  initialized: false
+const model = <LocalModel>{
+  isInitialized: false
 }
 
 // Form
@@ -14,7 +11,7 @@ const form = <FormInput>document.getElementById('form-input')
 form.addEventListener('change', e => {
   const currentTarget = <typeof e.currentTarget & HTMLInputElement>e.target
 
-  if (currentTarget === null || typeof model.set === 'undefined') {
+  if (currentTarget === null || !model.isInitialized) {
     return
   }
   const newDataObject = <StateObject>{}
@@ -43,7 +40,7 @@ form.addEventListener('change', e => {
       return
   }
   
-  if (Object.values(newDataObject).length > 0) {
+  if (Object.values(newDataObject).length > 0 && model.isInitialized) {
     model.set(newDataObject)
   }
 })
@@ -73,8 +70,7 @@ function update(newData: StateObject) {
 
 export default {
   initModel(thisModel: Store) {
-    model.set = thisModel.set
-    model.initialized = true
+    Object.assign(model, { set: thisModel.set, isInitialized: true })
     Object.freeze(model)
 
     update(thisModel.get())

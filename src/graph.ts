@@ -1,14 +1,11 @@
 import GraphCanvas from "./canvas"
-import { StateObject, Store } from "./ts"
+import { LocalModel, StateObject, Store } from "./ts"
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 400
 
-const model: {
-  set?: (newData: any) => void,
-  initialized: boolean
-} = {
-  initialized: false
+const model: LocalModel = {
+  isInitialized: false
 }
 
 const canvasHTMLElement = <HTMLCanvasElement>document.getElementById('graph')
@@ -33,16 +30,22 @@ function update(newData: StateObject) {
     canvas.object.update(newData)
   } else {
     const object = new GraphCanvas(canvasHTMLElement, CANVAS_WIDTH, CANVAS_HEIGHT, newData)
-    object.refresh()
 
     Object.assign(canvas, { object, isInitialized: true })
+
+    if (model.isInitialized) {
+      object.onChange = model.set
+    } else {
+      console.error('LocalModel for graph not initialized')
+    }
   }
 }
 
 export default {
   initModel(thisModel: Store) {
-    model.set = thisModel.set
-    model.initialized = true
+    Object.assign(model, {set: thisModel.set, isInitialized: true})
+    // model.set = thisModel.set
+    // model.isInitialized = true
     Object.freeze(model)
   },
   update

@@ -18,6 +18,13 @@ export type StateObject = {
   toPxConversion: number;
 }
 
+export type LocalModel = {
+  isInitialized: false;
+} | {
+  isInitialized: true;
+  set(newVal: Partial<StateObject>): void;
+}
+
 export type StoreInterface = {
   subscribe(newData: StateObject, initialize?: boolean): void;
   unsubscribe: Observable['unsubscribe'];
