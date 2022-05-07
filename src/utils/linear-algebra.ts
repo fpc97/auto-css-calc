@@ -1,7 +1,9 @@
 /** Class representing a linear function */
 export class LinearFunction{
-  private _slope: number;
-  private _intercept: number;
+  private static readonly SLOPE_OFFSET = 9e90
+
+  private readonly _slope: number;
+  private readonly _intercept: number;
 
   /**
    * Create linear function using a slope and an intercept
@@ -17,11 +19,13 @@ export class LinearFunction{
   constructor(p1: Point, p2: Point);
   constructor(p1OrSlope: Point | number, p2OrIntercept: Point | number) {
     if (typeof p1OrSlope === 'number' && typeof p2OrIntercept === 'number') {
-      /** Create the slope using slope and intercept */
-      this._slope = p1OrSlope
+      // Create the function using slope and intercept
+      const slope = Math.abs(p1OrSlope) !== Infinity ? p1OrSlope : LinearFunction.SLOPE_OFFSET
+
+      this._slope = slope
       this._intercept = p2OrIntercept
     } else {
-      /** Create the slope using two points P1 and P2 */
+      // Create the function using two points P1 and P2
       const p1 = p1OrSlope
       const p2 = p2OrIntercept
   
@@ -35,8 +39,10 @@ export class LinearFunction{
       ) {
         throw new Error()
       }
+
+      const slope = (p2.y - p1.y) / (p2.x - p1.x)
   
-      this._slope = (p2.y - p1.y) / (p2.x - p1.x)
+      this._slope = Math.abs(slope) !== Infinity ? slope : LinearFunction.SLOPE_OFFSET
       this._intercept = p1.y - this._slope * p1.x
     }
   }
@@ -48,7 +54,7 @@ export class LinearFunction{
    * @returns {LinearFunction} The linear function instance
    */
   static fromPointSlope(p: Point, slope: number) {
-    const intercept = slope - slope * p.x - p.y
+    const intercept = p.y - slope * p.x
     return new LinearFunction(slope, intercept)
   }
 
@@ -64,7 +70,12 @@ export class LinearFunction{
     }
 
     const x = (l2.intercept - l1.intercept) / (l1.slope - l2.slope)
-    const y = l1.getYFromX(x)
+    // Hack: due to JS having trouble with big numbers
+    const y = l1.slope === 0
+      ? l1.intercept
+      : l2.slope === 0
+      ? l2.intercept
+      : l1.getYFromX(x)
 
     return new Point(x, y)
   }
@@ -92,7 +103,7 @@ export class LinearFunction{
    * @param {Point} p Point P
    * @returns Distance to point P
    */
-  distanceFrom(p: Point) {
+  distanceToPoint(p: Point) {
     const inverse = this.inverse
     const adjustedInverse = LinearFunction.fromPointSlope(p, inverse.slope)
     const intersection = LinearFunction.intersection(this, adjustedInverse)
@@ -101,11 +112,41 @@ export class LinearFunction{
   }
 
   /**
+   * Calculate distance minimum distance to point P within a range of the linear function
+   * @param {Point} p Point P
+   * @param {number} x1 Lower limit of range in x. Set as null if no limit
+   * @param {number} x2 Higher limit of range in x. Set as null if no limit
+   */
+  distanceToPointInRange(p: Point, x1: number | null, x2: number | null) {
+    // Limits defaults
+    const lowerLimit = x1 === null ? -Infinity : x1
+    const higherLimit = x2 === null ? Infinity : x2
+
+    // Create inverse function at p
+    const inverseAtPoint = LinearFunction.fromPointSlope(p, this.inverse.slope)
+
+    // Get intersection point between inverse and original
+    const intersection = LinearFunction.intersection(this, inverseAtPoint)
+
+    // Return distance between intersection and p if intersection falls within range
+    if (intersection.x > lowerLimit && intersection.x < higherLimit) {
+      return Point.distanceBetween(intersection, p)
+    }
+
+    // Create the two points
+    const lowerEndPoint = new Point(lowerLimit, this.getYFromX(lowerLimit))
+    const higherEndPoint = new Point(higherLimit, this.getYFromX(higherLimit))
+
+    /** Return lowest distance between the two */
+    return Math.min(Point.distanceBetween(p, lowerEndPoint), Point.distanceBetween(p, higherEndPoint))
+  }
+
+  /**
    * Get inverse linear function
    * @returns {LinearFunction} The inverse linear function
    */
   get inverse() {
-    return new LinearFunction(1 / this._slope, this._intercept)
+    return new LinearFunction(-1 / this._slope, this._intercept)
   }
   
   /**
@@ -127,8 +168,8 @@ export class LinearFunction{
 
 /** Class representing a point */
 export class Point{
-  private _x: number;
-  private _y: number;
+  readonly x: number;
+  readonly y: number;
 
   /**
    * Create a point
@@ -140,25 +181,25 @@ export class Point{
       throw new TypeError('Point needs two number arguments (x, y)')
     }
     
-    this._x = x
-    this._y = y
+    this.x = x
+    this.y = y
   }
 
   /**
    * Get value of x
    * @returns {number} The value of x
    */
-  get x() {
-    return this._x
-  }
+  // get x() {
+  //   return this.x
+  // }
 
   /**
    * Get value of y
    * @returns {number} The value of y
    */
-  get y() {
-    return this._y
-  }
+  // get y() {
+  //   return this.y
+  // }
 
   /**
    * Determines if an object has coordinates determined by properties 'x' and 'y' which should be both of the type 'number'
