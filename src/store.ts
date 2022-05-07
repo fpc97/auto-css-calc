@@ -24,6 +24,13 @@ function modifyData(newProps: Partial<StateObject>) {
     }
   })
 
+  if (newData.sizes) {
+    newData.sizes[0][0] = parseFloat(newData.sizes[0][0].toFixed(2))
+    newData.sizes[0][1] = parseFloat(newData.sizes[0][1].toFixed(2))
+    newData.sizes[1][0] = parseFloat(newData.sizes[1][0].toFixed(2))
+    newData.sizes[1][1] = parseFloat(newData.sizes[1][1].toFixed(2))
+  }
+
   if (Object.entries(newData).length === 0) {
     return
   }
