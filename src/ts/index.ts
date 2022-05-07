@@ -1,18 +1,28 @@
-export type KeysOrType<T> = T extends {[k: string | number | symbol]: unknown}
-  ? {[K in keyof T]: T[K]}
-  : T
+import { Observable as ObservableClass } from "../utils"
+import store from '../store'
+
+export type Observable = (typeof ObservableClass)['prototype']
+
+export type Store = typeof store
 
 export type CSSSizeUnits = 'px' | 'rem' | 'em'
 
 export type CSSViewportUnits = 'vw' | 'vh'
 
-export type DimensionUnitPair = [number, number]
+export type DimensionUnitPair = [dimension: number, unit: number]
 
 export type StateObject = {
   sizeUnit: CSSSizeUnits;
   viewportUnit: CSSViewportUnits;
   sizes: [DimensionUnitPair, DimensionUnitPair];
   toPxConversion: number;
+}
+
+export type StoreInterface = {
+  subscribe(newData: StateObject, initialize?: boolean): void;
+  unsubscribe: Observable['unsubscribe'];
+  get(): StateObject;
+  set(newData: StateObject): void;
 }
 
 export interface FormInput extends HTMLFormElement{
@@ -29,3 +39,8 @@ export type Point = {
   x: number;
   y: number;
 }
+
+/** Utilities */
+export type KeysOrType<T> = T extends {[k: string | number | symbol]: unknown}
+  ? {[K in keyof T]: T[K]}
+  : T

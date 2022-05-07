@@ -1,4 +1,4 @@
-import { CSSSizeUnits, CSSViewportUnits, FormInput, StateObject } from "./ts"
+import { CSSSizeUnits, CSSViewportUnits, FormInput, StateObject, Store } from "./ts"
 
 const model: {
   set?: (newData: any) => void,
@@ -33,16 +33,16 @@ form.addEventListener('change', e => {
     case 'to-px-conversion':
       newDataObject.toPxConversion = parseFloat(currentTarget.value)
       break
-    case 'sizeUnit':
+    case 'size-unit':
       newDataObject.sizeUnit = <CSSSizeUnits>currentTarget.value
       break
-    case 'viewportUnit':
+    case 'viewport-unit':
       newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
       break
     default:
       return
   }
-
+  
   if (Object.values(newDataObject).length > 0) {
     model.set(newDataObject)
   }
@@ -72,7 +72,7 @@ function update(newData: StateObject) {
 
 
 export default {
-  initModel(thisModel: { set(newData: StateObject): void, get(): StateObject }) {
+  initModel(thisModel: Store) {
     model.set = thisModel.set
     model.initialized = true
     Object.freeze(model)

@@ -33,7 +33,13 @@ function modifyData(newProps: Partial<StateObject>) {
 }
 
 export default {
-  subscribe: observable.subscribe.bind(observable),
+  subscribe(cb: (newData: StateObject) => void, initialize: boolean = true) {
+    observable.subscribe.call(observable, cb)
+
+    if (initialize) {
+      cb(state)
+    }
+  },
   unsubscribe: observable.unsubscribe.bind(observable),
   get() {
     return state

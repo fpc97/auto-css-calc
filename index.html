@@ -17,18 +17,18 @@
       </fieldset>
       <fieldset>
         <legend>Size units</legend>
-        <input type="radio" name="unit" value="px" id="px">
+        <input type="radio" name="size-unit" value="px" id="px">
         <label for="px">px</label>
-        <input type="radio" name="unit" value="rem" id="rem">
+        <input type="radio" name="size-unit" value="rem" id="rem">
         <label for="rem">rem</label>
-        <input type="radio" name="unit" value="em" id="em">
+        <input type="radio" name="size-unit" value="em" id="em">
         <label for="em">em</label>
       </fieldset>
       <fieldset>
         <legend>Viewport units</legend>
-        <input type="radio" name="unit" value="vw" id="vw">
+        <input type="radio" name="viewport-unit" value="vw" id="vw">
         <label for="vw">vw</label>
-        <input type="radio" name="unit" value="vh" id="vh">
+        <input type="radio" name="viewport-unit" value="vh" id="vh">
         <label for="vh">vh</label>
       </fieldset>
       <fieldset>
@@ -36,8 +36,10 @@
         <input type="number" name="to-px-conversion" id="to-px-conversion">
       </fieldset>
     </form>
-    <div id="graph"></div>
-    <div id="css-output"></div>
+    <canvas id="graph"></canvas>
+    <div id="css-output">
+      <p class="text"></p>
+    </div>
     <div id="sample"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
