@@ -187,13 +187,19 @@ export default class GraphCanvas{
   // Change listeners
   private changeListeners: ((newData: Partial<StateObject>) => void)[];
  
+  /**
+   * Create new GraphCanvas object
+   * 
+   * @param {HTMLCanvasElement} canvasHTMLElement The HTML canvas element where the UI will be displayed
+   * @param {number} width Width the HTML element will have
+   * @param {number} height Height the HTML element will have
+   * @param {StateObject} configObject Initial state to configure the object with
+   */
   constructor(
     canvasHTMLElement: HTMLCanvasElement,
     width: number,
     height: number,
-    settingsObject: StateObject,
-    isClampedMin: boolean = true,
-    isClampedMax: boolean = true
+    configObject: StateObject
   ) {
     const ctx = canvasHTMLElement.getContext('2d')
   
@@ -201,16 +207,16 @@ export default class GraphCanvas{
       throw new Error('Failed to create canvas context')
     }
 
-    this.p1 = new Point(...settingsObject.sizes[0])
-    this.p2 = new Point(...settingsObject.sizes[1])
+    this.p1 = new Point(...configObject.sizes[0])
+    this.p2 = new Point(...configObject.sizes[1])
 
     this.virtualWidth = 0
     this.virtualHeight = 0
     this.setVirtualDimensionsFromPoints()
 
-    this.isClampedMin = isClampedMin
-    this.isClampedMax = isClampedMax
-    this.cssUnit = settingsObject.sizeUnit
+    this.isClampedMin = configObject.isClampedMin
+    this.isClampedMax = configObject.isClampedMax
+    this.cssUnit = configObject.sizeUnit
 
     this.pStart = {x: 0, y: 0}
     this.pEnd = {x: 0, y: 0}
@@ -838,20 +844,14 @@ export default class GraphCanvas{
   }
 
   public update(newDataObject: StateObject) {
-    // this.isClampedMin = newDataObject.isClampedMin               // IMPLEMENT
-    // this.isClampedMax = newDataObject.isClampedMax
-    
-    // if ('isClampedMin' in newDataObject) {
-    //   this.isClampedMin = newDataObject.isClampedMin
-    // }
-    // if ('isClampedMax' in newDataObject) {
-    //   this.isClampedMax = newDataObject.isClampedMax
-    // }
+    if ('isClampedMin' in newDataObject) {
+      this.isClampedMin = newDataObject.isClampedMin
+    }
+    if ('isClampedMax' in newDataObject) {
+      this.isClampedMax = newDataObject.isClampedMax
+    }
 
     if ('sizes' in newDataObject) {
-      // this.p1 = new Point(...newDataObject.sizes[0])
-      // this.p2 = new Point(...newDataObject.sizes[1])
-
       this.movePoint('p1', new Point(...newDataObject.sizes[0]))
       this.movePoint('p2', new Point(...newDataObject.sizes[1]))
 

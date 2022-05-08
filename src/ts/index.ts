@@ -16,6 +16,8 @@ export type StateObject = {
   viewportUnit: CSSViewportUnits;
   sizes: [DimensionUnitPair, DimensionUnitPair];
   toPxConversion: number;
+  isClampedMin: boolean;
+  isClampedMax: boolean;
 }
 
 export type LocalModel = {

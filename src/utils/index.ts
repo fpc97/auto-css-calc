@@ -55,7 +55,7 @@ export function clamp(n: number, min: number, max: number) {
 /**
  * Generate array with adjacent array members paired into subarrays
  * 
- * i.e: [1, 2, 3, 4] => [[1, 2], [2, 3], [3, 4]]
+ * i.e: [1, 2, 3, 4] -> [[1, 2], [2, 3], [3, 4]]
  * @param {array} arr Array
  * @returns Array with subarrays with paired elements
  */
@@ -66,4 +66,19 @@ export function getArrayPairsOf<T>(arr: T[]): [T, T][] {
   pairs.pop()
 
   return pairs
+}
+
+/**
+ * Transform text in kebab case to camel case
+ * 
+ * i.e: my-kebab-text -> myKebabText
+ * @param {string} str String to change
+ * @returns String in camel case
+ */
+export function kebabToCamelCase(str: string): string {
+  const arr = str.split('-')
+  const capital = arr.map((item, index) => index ? item.charAt(0).toUpperCase() + item.slice(1).toLowerCase() : item.toLowerCase())
+  const capitalString = capital.join("")
+
+  return capitalString
 }

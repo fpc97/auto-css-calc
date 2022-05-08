@@ -1,4 +1,5 @@
 import { CSSSizeUnits, CSSViewportUnits, FormInput, LocalModel, StateObject, Store } from "./ts"
+import { kebabToCamelCase } from "./utils"
 
 const model = <LocalModel>{
   isInitialized: false
@@ -16,7 +17,9 @@ form.addEventListener('change', e => {
   }
   const newDataObject = <StateObject>{}
 
-  switch(currentTarget.getAttribute('name')) {
+  const currentTargetName = currentTarget.getAttribute('name')
+
+  switch(currentTargetName) {
     case 'size-0':
     case 'size-1':
     case 'viewport-0':
@@ -35,6 +38,11 @@ form.addEventListener('change', e => {
       break
     case 'viewport-unit':
       newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
+      break
+    case 'is-clamped-min':
+    case 'is-clamped-max':
+      const key = currentTargetName === 'is-clamped-max' ? 'isClampedMax' : 'isClampedMin'
+      newDataObject[key] = <boolean>currentTarget.checked
       break
     default:
       return

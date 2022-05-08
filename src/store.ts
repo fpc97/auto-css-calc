@@ -8,7 +8,9 @@ const state: StateObject = Object.seal({
     [200, 14],
     [400, 21]
   ],
-  toPxConversion: 16
+  toPxConversion: 16,
+  isClampedMin: false,
+  isClampedMax: false
 })
 
 const observable = new Observable<StateObject>()
