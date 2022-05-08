@@ -70,7 +70,7 @@ function toggleDisplayFieldsetOf(inputElement: HTMLInputElement, hide?: boolean)
   const isHide = hide !== null
     ? hide
     : currentElement.style.display !== 'none'
-  
+
   if (isHide) {
     currentElement.style.display = 'none'
     inputElement.setAttribute('disabled', 'disabled')

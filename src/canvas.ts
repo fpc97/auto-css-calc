@@ -1,4 +1,4 @@
-import { CSSSizeUnits, DimensionUnitPair, StateObject } from "./ts";
+import { CSSSizeUnits, CSSViewportUnits, DimensionUnitPair, StateObject } from "./ts";
 import { clamp, getArrayPairsOf } from "./utils";
 import { LinearFunction, Point } from "./utils/linear-algebra";
 
@@ -133,7 +133,8 @@ export default class GraphCanvas{
   // Properties passed exclusively externally
   private isClampedMin: boolean;
   private isClampedMax: boolean;
-  private cssUnit: CSSSizeUnits;
+  private cssUnitSize: CSSSizeUnits;
+  private cssUnitViewport: CSSViewportUnits;
 
   // Cursor info
   /** Indicates if cursor is hovering the canvas */
@@ -221,7 +222,8 @@ export default class GraphCanvas{
 
     this.isClampedMin = configObject.isClampedMin
     this.isClampedMax = configObject.isClampedMax
-    this.cssUnit = configObject.sizeUnit
+    this.cssUnitSize = configObject.sizeUnit
+    this.cssUnitViewport = configObject.viewportUnit
 
     this.pStart = {x: 0, y: 0}
     this.pEnd = {x: 0, y: 0}
@@ -746,7 +748,7 @@ export default class GraphCanvas{
   }
 
   /**
-   * 
+   * Draw square representing a point
    * @param {Point} p Point where the center of the square will be
    * @param {number} side Length of the sides of the square
    */
@@ -827,6 +829,12 @@ export default class GraphCanvas{
         'right'
       )
     }
+
+    const endOfXRuler = this.virtualToElementCoords(new Point(this.virtualWidth, 0))
+    const endOfYRuler = this.virtualToElementCoords(new Point(0, this.virtualHeight))
+
+    this.drawText(`(${this.cssUnitViewport})`, endOfXRuler)
+    this.drawText(`(${this.cssUnitSize})`, endOfYRuler, 'right')
   }
 
   public set onChange(cb: (newData: Partial<StateObject>) => void) {
@@ -863,6 +871,13 @@ export default class GraphCanvas{
       this.setVirtualDimensionsFromPoints()
 
       this.updateLimitPoints()
+    }
+
+    if ('sizeUnit' in newDataObject) {
+      this.cssUnitSize = newDataObject.sizeUnit
+    }
+    if ('viewportUnit' in newDataObject) {
+      this.cssUnitViewport = newDataObject.viewportUnit
     }
 
     this.refresh()
