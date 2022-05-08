@@ -9,7 +9,7 @@ const model = <LocalModel>{
 const form = <FormInput>document.getElementById('form-input')
 
 // User input
-form.addEventListener('change', e => {
+function handleFormChange(this: HTMLFormElement, e: Event) {
   const currentTarget = <typeof e.currentTarget & HTMLInputElement>e.target
 
   if (currentTarget === null || !model.isInitialized) {
@@ -35,6 +35,11 @@ form.addEventListener('change', e => {
       break
     case 'size-unit':
       newDataObject.sizeUnit = <CSSSizeUnits>currentTarget.value
+
+      const conversionInput = this['to-px-conversion']
+      const isHideConversion = currentTarget.value === 'px'
+
+      toggleDisplayFieldsetOf(conversionInput, isHideConversion)
       break
     case 'viewport-unit':
       newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
@@ -51,7 +56,31 @@ form.addEventListener('change', e => {
   if (Object.values(newDataObject).length > 0 && model.isInitialized) {
     model.set(newDataObject)
   }
-})
+}
+
+function toggleDisplayFieldsetOf(inputElement: HTMLInputElement, hide?: boolean) {
+  let currentElement: HTMLElement = inputElement
+  while (currentElement.tagName !== 'FIELDSET' && currentElement.parentElement !== null) {
+    currentElement = currentElement.parentElement
+  }
+  if (currentElement.tagName !== 'FIELDSET') {
+    return
+  }
+
+  const isHide = hide !== null
+    ? hide
+    : currentElement.style.display !== 'none'
+  
+  if (isHide) {
+    currentElement.style.display = 'none'
+    inputElement.setAttribute('disabled', 'disabled')
+  } else {
+    currentElement.style.display = ''
+    inputElement.removeAttribute('disabled')
+  }
+}
+
+form.addEventListener('change', handleFormChange)
 
 // Update
 function update(newData: StateObject) {
