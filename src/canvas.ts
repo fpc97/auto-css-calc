@@ -116,7 +116,7 @@ export default class GraphCanvas{
    * @property {number} right The distance between the right of the HTML Element and the left of the viewport (same as x + width)
    * @property {number} bottom The distance between the bottom of the HTML Element and the top of the viewport (same as y + height)
    */
-  private boundingRect: DOMRect;
+  // private boundingRect: DOMRect;
   /**
    * Virtual unit
    * 
@@ -167,6 +167,11 @@ export default class GraphCanvas{
   private isReduceY: boolean;
 
   // Getters
+  /** */
+  private get boundingRect() {
+    return this.htmlElement.getBoundingClientRect()
+  }
+
   /**
    * Element unit
    * 
@@ -228,8 +233,8 @@ export default class GraphCanvas{
 
     this.ctx = ctx
 
-    this.boundingRect = this.htmlElement.getBoundingClientRect()
-    window.addEventListener('resize', this.updateClientRect)
+    // this.boundingRect = this.htmlElement.getBoundingClientRect()
+    // window.addEventListener('resize', this.updateClientRect)
     
     this.rulerSpacing = { x: 0, y: 0 }
     this.updateRulerSpacing('x')
@@ -628,9 +633,9 @@ export default class GraphCanvas{
     }
   }
 
-  private updateClientRect() {
-    this.boundingRect = this.htmlElement.getBoundingClientRect()
-  }
+  // private updateClientRect() {
+  //   this.boundingRect = this.htmlElement.getBoundingClientRect()
+  // }
 
   /**
    * Transform viewport units to virtual units
