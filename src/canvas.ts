@@ -780,7 +780,7 @@ export default class GraphCanvas{
 
   private draw() {
     this.ctx.clearRect(0, 0, this.htmlElement.width, this.htmlElement.height)
-    const fillStylePrev = this.ctx.fillStyle
+    // const fillStylePrev = this.ctx.fillStyle
 
     // Draw lines
     const pointSequence = [this.pStart, this.p1, this.p2, this.pEnd]
@@ -805,15 +805,15 @@ export default class GraphCanvas{
     this.drawPointSquare(this.virtualToElementCoords(this.p2), 20, colors[1])
     
     // Draw rulers
-    this.ctx.fillStyle = 'white'
-    this.ctx.fillRect(0, 0, GraphCanvas.MARGIN_LEFT, this.boundingRect.height)
-    this.ctx.fillRect(
-      0,
-      this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM,
-      this.boundingRect.width,
-      GraphCanvas.MARGIN_BOTTOM
-    )
-    this.ctx.fillStyle = fillStylePrev
+    // this.ctx.fillStyle = 'white'
+    // this.ctx.fillRect(0, 0, GraphCanvas.MARGIN_LEFT, this.boundingRect.height)
+    // this.ctx.fillRect(
+    //   0,
+    //   this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM,
+    //   this.boundingRect.width,
+    //   GraphCanvas.MARGIN_BOTTOM
+    // )
+    // this.ctx.fillStyle = fillStylePrev
 
     const markingLengthX = this.elementToVirtualUnits('y', GraphCanvas.RULER_MARKING_LENGTH)
     for (let i = 0; i < this.virtualWidth; i += this.rulerSpacing.x) {
