@@ -30,6 +30,16 @@ export default class GraphCanvas{
    * 
    * Delimits the space where the y ruler will be placed */
   private static readonly MARGIN_LEFT = 40;
+  /** 
+   * Element unit
+   * 
+   * Delimits the space where the x ruler will stop */
+  private static readonly MARGIN_TOP = 20;
+  /**
+   * Element unit
+   * 
+   * Delimits the space where the y ruler will stop */
+  private static readonly MARGIN_RIGHT = 40;
   /**
    * Element unit
    * 
@@ -179,7 +189,7 @@ export default class GraphCanvas{
    * Width of the section of the canvas belonging to the axis system
    */
   private get gridWidth() {
-    return this.boundingRect.width - GraphCanvas.MARGIN_LEFT
+    return this.boundingRect.width - GraphCanvas.MARGIN_LEFT - GraphCanvas.MARGIN_RIGHT
   }
   /**
    * Element unit
@@ -187,7 +197,7 @@ export default class GraphCanvas{
    * Height of the section of the canvas belonging to the axis system
    */
   private get gridHeight() {
-    return this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM
+    return this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM - GraphCanvas.MARGIN_TOP
   }
 
   // Change listeners
@@ -274,8 +284,11 @@ export default class GraphCanvas{
     const lowerInY = Math.min(this.p1.y, this.p2.y)
     const higherInY = Math.max(this.p1.y, this.p2.y)
 
-    const newWidth = Math.min(this.p1.x * 2 + (this.p2.x - this.p1.x), GraphCanvas.MAX_VIRTUAL_WIDTH)
-    const newHeight = Math.min(lowerInY * 2 + higherInY - lowerInY, GraphCanvas.MAX_VIRTUAL_HEIGHT)
+    const spaceRight = Math.max(this.p1.x, this.p2.x * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2)
+    const spaceTop  = Math.max(lowerInY, higherInY * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2)
+
+    const newWidth = Math.min(this.p1.x + this.p2.x - this.p1.x + spaceRight, GraphCanvas.MAX_VIRTUAL_WIDTH)
+    const newHeight = Math.min(lowerInY + higherInY - lowerInY + spaceTop, GraphCanvas.MAX_VIRTUAL_HEIGHT)
 
     this.virtualWidth = newWidth
     this.virtualHeight = newHeight
@@ -301,15 +314,19 @@ export default class GraphCanvas{
       && this[this.nonHighlightedPoint].y < this.virtualHeight
   }
 
-  private movePoint(pName: 'p1' | 'p2', newPosition: Point) {
+  private movePoint(pName: 'p1' | 'p2', newPosition: Point, isClamped: boolean = true) {
     const horizontalLimits = pName === 'p1'
       ? [0, this.p2.x - 1]
       : [this.p1.x + 1, this.virtualWidth]
 
-    const xClamped = clamp(newPosition.x, horizontalLimits[0], horizontalLimits[1])
-    const yClamped = clamp(newPosition.y, 0, this.virtualHeight)
+    const xFinal = isClamped
+      ? clamp(newPosition.x, horizontalLimits[0], horizontalLimits[1])
+      : newPosition.x
+    const yFinal = isClamped
+      ? clamp(newPosition.y, 0, this.virtualHeight)
+      : newPosition.y
     
-    this[pName] = new Point(xClamped, yClamped)
+    this[pName] = new Point(xFinal, yFinal)
   }
 
   /**
@@ -685,18 +702,17 @@ export default class GraphCanvas{
   private virtualToElementCoords(virtualCoords: Point) {
     /** Virtual Y represented from top to bottom */
     const virtualYInverse = (this.virtualHeight - virtualCoords.y)
-      // - this.elementToVirtualUnits('y', GraphCanvas.MARGIN_BOTTOM)
 
     const elementRelativeX = this.virtualToElementUnits('x', virtualCoords.x) + GraphCanvas.MARGIN_LEFT
-    const elementRelativeY = this.virtualToElementUnits('y', virtualYInverse)
+    const elementRelativeY = this.virtualToElementUnits('y', virtualYInverse) + GraphCanvas.MARGIN_TOP
 
     return new Point(elementRelativeX, elementRelativeY)
   }
 
   private elementToVirtualCoords(elementCoords: Point) {
     /** Virtual Y represented from top to bottom */
-    const virtualYInverse = this.elementToVirtualUnits('y', elementCoords.y)
     const virtualX = this.elementToVirtualUnits('x', elementCoords.x - GraphCanvas.MARGIN_LEFT)
+    const virtualYInverse = this.elementToVirtualUnits('y', elementCoords.y - GraphCanvas.MARGIN_TOP)
 
     /** Virtual Y represented from bottom to top */
     const virtualY = this.virtualHeight - virtualYInverse
@@ -830,11 +846,26 @@ export default class GraphCanvas{
       )
     }
 
-    const endOfXRuler = this.virtualToElementCoords(new Point(this.virtualWidth, 0))
-    const endOfYRuler = this.virtualToElementCoords(new Point(0, this.virtualHeight))
+    // const endOfXRuler = this.virtualToElementCoords(new Point(this.virtualWidth, 0))
+    // const endOfYRuler = this.virtualToElementCoords(new Point(0, this.virtualHeight))
 
-    this.drawText(`(${this.cssUnitViewport})`, endOfXRuler)
-    this.drawText(`(${this.cssUnitSize})`, endOfYRuler, 'right')
+    this.drawText(
+      `(${this.cssUnitViewport})`,
+      new Point(
+        this.boundingRect.width,
+        this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM + 8
+      ),
+      'right'
+    )
+
+    this.drawText(
+      `(${this.cssUnitSize})`,
+      new Point(
+        GraphCanvas.MARGIN_LEFT,
+        8
+      ),
+      'right'
+    )
   }
 
   public set onChange(cb: (newData: Partial<StateObject>) => void) {
@@ -865,10 +896,13 @@ export default class GraphCanvas{
     }
 
     if ('sizes' in newDataObject) {
-      this.movePoint('p1', new Point(...newDataObject.sizes[0]))
-      this.movePoint('p2', new Point(...newDataObject.sizes[1]))
+      this.movePoint('p1', new Point(...newDataObject.sizes[0]), false)
+      this.movePoint('p2', new Point(...newDataObject.sizes[1]), false)
 
       this.setVirtualDimensionsFromPoints()
+
+      this.updateRulerSpacing('x')
+      this.updateRulerSpacing('y')
 
       this.updateLimitPoints()
     }
