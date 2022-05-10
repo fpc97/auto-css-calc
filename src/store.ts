@@ -1,7 +1,9 @@
 import { StateObject } from "./ts"
 import { Observable } from "./utils"
+import { retrieveLocalData, saveLocalData } from "./utils/local-storage"
 
-const state: StateObject = Object.seal({
+
+const state: StateObject = retrieveLocalData() || {
   sizeUnit: 'px',
   viewportUnit: 'vw',
   sizes: [
@@ -11,7 +13,8 @@ const state: StateObject = Object.seal({
   toPxConversion: 16,
   isClampedMin: false,
   isClampedMax: false
-})
+}
+Object.seal(state)
 
 const observable = new Observable<StateObject>()
 
@@ -39,6 +42,7 @@ function modifyData(newProps: Partial<StateObject>) {
 
   Object.assign(state, newData)
   observable.notify(state)
+  saveLocalData(state)
 }
 
 export default {
