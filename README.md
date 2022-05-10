@@ -1,4 +1,4 @@
-# Calc Generator
+# CSS Calc Generator
 
 A tool to easily create CSS calc() functions using two reference points
 
