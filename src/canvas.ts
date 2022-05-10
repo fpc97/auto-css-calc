@@ -201,6 +201,7 @@ export default class GraphCanvas{
   }
 
   // Change listeners
+  /** Array to store the functions to be called when the canvas is updated */
   private changeListeners: ((newData: Partial<StateObject>) => void)[];
  
   /**
@@ -210,6 +211,7 @@ export default class GraphCanvas{
    * @param {number} width Width the HTML element will have
    * @param {number} height Height the HTML element will have
    * @param {StateObject} configObject Initial state to configure the object with
+   * @returns {GraphCanvas} Graph object representation
    */
   constructor(
     canvasHTMLElement: HTMLCanvasElement,
@@ -314,17 +316,23 @@ export default class GraphCanvas{
       && this[this.nonHighlightedPoint].y < this.virtualHeight
   }
 
-  private movePoint(pName: 'p1' | 'p2', newPosition: Point, isClamped: boolean = true) {
+  /**
+   * Move p1 or p2 to a new position
+   * @param {('p1' | 'p2')} pName Name of the point to move
+   * @param {Point} newCoords Coordinates to to move the point to
+   * @param {boolean} isClamped Indicates if the point has to be clamped within virtual limits
+   */
+  private movePoint(pName: 'p1' | 'p2', newCoords: Point, isClamped: boolean = true) {
     const horizontalLimits = pName === 'p1'
       ? [0, this.p2.x - 1]
       : [this.p1.x + 1, this.virtualWidth]
 
     const xFinal = isClamped
-      ? clamp(newPosition.x, horizontalLimits[0], horizontalLimits[1])
-      : newPosition.x
+      ? clamp(newCoords.x, horizontalLimits[0], horizontalLimits[1])
+      : newCoords.x
     const yFinal = isClamped
-      ? clamp(newPosition.y, 0, this.virtualHeight)
-      : newPosition.y
+      ? clamp(newCoords.y, 0, this.virtualHeight)
+      : newCoords.y
     
     this[pName] = new Point(xFinal, yFinal)
   }
@@ -534,15 +542,27 @@ export default class GraphCanvas{
       this.movePoint(this.highlightedPoint, virtualCursorCoords)
       this.updateLimitPoints()
 
+      const isExtendXPrev = this.isExtendX
+      const isExtendYPrev = this.isExtendY
+      const isReduceXPrev = this.isReduceX
+      const isReduceYPrev = this.isReduceY
       this.checkExtendVirtualDimensions()
 
       const isExtension = this.isExtendX || this.isExtendY || this.isReduceX || this.isReduceY
+
+      const isChange = (this.isExtendX !== isExtendXPrev)
+        || (this.isExtendY !== isExtendYPrev)
+        || (this.isReduceX !== isReduceXPrev)
+        || (this.isReduceY !== isReduceYPrev)
 
       if (isExtension && !this.extendIntervalId) {
         // this.extendIntervalId = setInterval(() => {
         //   // this.isExtendLooping = true
         //   this.extendLoop()
         // }, 1/60)
+        this.startExtensionLoop()
+      } else if (isChange && this.extendIntervalId !== null) {
+        this.stopExtensionLoop()
         this.startExtensionLoop()
       } else if (!isExtension && this.extendIntervalId !== null) {
         // clearInterval(this.extendIntervalId)
