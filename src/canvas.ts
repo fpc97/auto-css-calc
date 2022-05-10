@@ -55,10 +55,10 @@ export default class GraphCanvas{
    * Virtual unit
    * 
    * Base multiplier to define the virtual ruler numbers with.
-   * Currently set to 25/(2^8) which when multiplied by powers of 2
+   * Currently set to 10/(2^8) which when multiplied by powers of 2
    * returns (respectively, starting from 2^8):
    * 
-   * 0.1953125; 0.390625; 0.78125; 1.5625; 3.125; 6.25; 12.5; 25; 50; 100; ...
+   * .0390625; .078125; .15625; .3125; .625; 1.25; 2.5; 5; 10; 20; 40; 80; ...
    */
   private static readonly GRID_SIZE_MULTIPLIER = 10 / 256;
   /**
@@ -67,7 +67,7 @@ export default class GraphCanvas{
    * Minimum space (in px) rulers can have between markings */
   private static readonly MIN_RULER_SPACING = 40;
   private static readonly RULER_MARKING_LENGTH = 8;
-  private static readonly RULER_MARKING_THICKNESS = 1;
+  // private static readonly RULER_MARKING_THICKNESS = 1;
 
   /**
    * Relative unit
@@ -148,7 +148,7 @@ export default class GraphCanvas{
 
   // Cursor info
   /** Indicates if cursor is hovering the canvas */
-  private isCursorIn: boolean;
+  // private isCursorIn: boolean;
   /** Indicates if mouse is currently pressed */
   // private isMouseDown: boolean;
   /** Indicates if mouse is currently pressed after being pressed while hovering canvas */
@@ -256,7 +256,7 @@ export default class GraphCanvas{
 
     this.cursorCoords = new Point(-1, -1)
     this.lineSnappedCursor = null
-    this.isCursorIn = false
+    // this.isCursorIn = false
 
     this.highlightedPoint = null
     this.isPointSelected = false
@@ -400,25 +400,33 @@ export default class GraphCanvas{
     const cursorViewportX = e.clientX
     const cursorViewportY = e.clientY
 
-    const cursorCanvasX = cursorViewportX - this.boundingRect.left
-    const cursorCanvasY = cursorViewportY - this.boundingRect.top
+    // const cursorCanvasX = cursorViewportX - this.boundingRect.left
+    // const cursorCanvasY = cursorViewportY - this.boundingRect.top
 
     // const cursorCanvasCoords = new Point(cursorCanvasX, cursorCanvasY)
 
-    if (
-      cursorCanvasX > 0
-      && cursorCanvasX > this.boundingRect.width
-      && cursorCanvasY > 0
-      && cursorCanvasY > this.boundingRect.height
-    ) {
-      this.isCursorIn = true
-    } else {
-      this.isCursorIn = false
-    }
+    // if (
+    //   cursorCanvasX > 0
+    //   && cursorCanvasX > this.boundingRect.width
+    //   && cursorCanvasY > 0
+    //   && cursorCanvasY > this.boundingRect.height
+    // ) {
+    //   this.isCursorIn = true
+    // } else {
+    //   this.isCursorIn = false
+    // }
     
     this.cursorCoords = this.viewportToElementCoords(new Point(cursorViewportX, cursorViewportY))
   }
 
+  /**
+   * Start a loop that extends the dimensions without the need for external events
+   * 
+   * It'll start an interval and assign its ID to this.extendIntervalId
+   * 
+   * Can't be called if there already is a loop running. In which case
+   * this.stopExtensionLoop needs to be called first
+   */
   private startExtensionLoop() {
     const { highlightedPoint, nonHighlightedPoint } = this
 
@@ -495,9 +503,15 @@ export default class GraphCanvas{
     })
   }
 
+  /**
+   * Stop the extension loop
+   * 
+   * Clears the interval started by this.startExtensionLoop and assigngs
+   * this.extendIntervalId to null
+   */
   private stopExtensionLoop() {
     if (this.extendIntervalId === null) {
-      console.warn('Interval ID already cleared')
+      console.warn('Extension loop interval not found')
       return
     }
 
@@ -505,6 +519,10 @@ export default class GraphCanvas{
     this.extendIntervalId = null
   }
 
+  /**
+   * Event listener for 'mousemove'
+   * @param {MouseEvent} e Event object
+   */
   private handleMouseMove(e: MouseEvent) {
     this.updateCursorCoords(e)
     const virtualCursorCoords = this.elementToVirtualCoords(this.cursorCoords)

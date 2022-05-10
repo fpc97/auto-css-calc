@@ -6,9 +6,9 @@ if (typeof baseDOMElement === 'undefined') {
   throw new Error()
 }
 
-function writeCalc<Content extends string>(content: Content): `calc(${Content})` {
-  return `calc(${content})`
-}
+// function writeCalc<Content extends string>(content: Content): `calc(${Content})` {
+//   return `calc(${content})`
+// }
 
 function update(newData: StateObject) {
   if (baseDOMElement === null) {
