@@ -202,7 +202,7 @@ export default class GraphCanvas{
 
   // Change listeners
   /** Array to store the functions to be called when the canvas is updated */
-  private changeListeners: ((newData: Partial<StateObject>) => void)[];
+  private changeListener: null | ((newData: Partial<StateObject>) => void);
  
   /**
    * Create new GraphCanvas object
@@ -270,7 +270,7 @@ export default class GraphCanvas{
 
     this.extendIntervalId = null
 
-    this.changeListeners = []
+    this.changeListener = null
 
     window.addEventListener('mousemove', this.handleMouseMove.bind(this))
     window.addEventListener('mousedown', this.handleMouseDown.bind(this))
@@ -620,13 +620,13 @@ export default class GraphCanvas{
   }
 
   private handleMouseUp() {
-    if (this.changeListeners.length > 0) {
+    if (this.changeListener !== null) {
       const newSizes: [DimensionUnitPair, DimensionUnitPair] = [
         [this.p1.x, this.p1.y],
         [this.p2.x, this.p2.y]
       ]
 
-      this.changeListeners.map(cb => cb({ sizes: newSizes }))
+      this.changeListener({ sizes: newSizes })
     }
     
     if (this.isPointSelected) {
@@ -907,7 +907,7 @@ export default class GraphCanvas{
   }
 
   public set onChange(cb: (newData: Partial<StateObject>) => void) {
-    this.changeListeners.push(cb)
+    this.changeListener = cb
   }
 
   public refresh() {
