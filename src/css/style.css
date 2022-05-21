@@ -1,4 +1,75 @@
-body{
-  background-color: #e0e0e0;
+html{
+  font-size: 62.5%;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
+body{
+  box-sizing: border-box;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+.dashboard{
+  height: 100vh;
+  overflow-y: auto;
+}
+@media(min-width: 768px) {
+  .dashboard{
+    width: 32rem;
+    background-color: #f0f0f0;
+  }
+}
+
+.form-input__fieldset{
+  border: none;
+}
+.form-input__legend{
+  display: none;
+}
+input[type=number] { 
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none;
+}
+
+.form-input__fieldset--values{
+  background-color: #4791FF;
+  padding: 2rem;
+}
+.form-input__size-pair{
+  display: inline-block;
+  width: 11rem;
+  margin-right: 1rem;
+}
+.form-input__label{
+  position: relative;
+  display: inline-block;
+  height: 5rem;
+}
+.form-input__fieldset--values .form-input__span{
+  position: absolute;
+  right: .8rem;
+  bottom: 1.23rem;
+  /* transform: translateX(-50%); */
+  pointer-events: none;
+  font-size: 1.4rem;
+}
+.form-input__input--number{
+  padding: 1rem;
+  border: none;
+  width: 100%;
+  height: 100%;
+  font-size: 2.1rem;
+  font-weight: bold;
+}
+
+.graph{
+  display: none;                /* Placeholder */
+}
