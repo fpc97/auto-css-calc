@@ -8,46 +8,56 @@
     <link rel="stylesheet" href="src/css/style.css">
   </head>
   <body>
-    <form id="form-input">
-      <fieldset>
-        <legend>Values</legend>
-        <input type="number" name="viewport-0" step=".01">
-        <input type="number" name="size-0" step=".01">
-        <input type="number" name="viewport-1" step=".01">
-        <input type="number" name="size-1" step=".01">
-      </fieldset>
-      <fieldset>
-        <legend>Size units</legend>
-        <input type="radio" name="size-unit" value="px" id="px">
-        <label for="px">px</label>
-        <input type="radio" name="size-unit" value="rem" id="rem">
-        <label for="rem">rem</label>
-        <input type="radio" name="size-unit" value="em" id="em">
-        <label for="em">em</label>
-      </fieldset>
-      <fieldset>
-        <legend>Viewport units</legend>
-        <input type="radio" name="viewport-unit" value="vw" id="vw">
-        <label for="vw">vw</label>
-        <input type="radio" name="viewport-unit" value="vh" id="vh">
-        <label for="vh">vh</label>
-      </fieldset>
-      <fieldset style="display: none">
-        <legend>Conversion to px</legend>
-        <input type="number" name="to-px-conversion" id="to-px-conversion">
-      </fieldset>
-      <fieldset>
-        <input type="checkbox" name="is-clamped-min" id="is-clamped-min">
-        <label for="is-clamped-min">Clamp at min viewport</label>
-        <input type="checkbox" name="is-clamped-max" id="is-clamped-max">
-        <label for="is-clamped-max">Clamp at max viewport</label>
-      </fieldset>
-    </form>
-    <canvas id="graph"></canvas>
-    <div id="css-output">
-      <p class="text"></p>
+    <div class="dashboard">
+      <form class="form-input" id="form-input">
+        <fieldset>
+          <legend>Values</legend>
+          <div class="viewport-size-pair">
+            <input type="number" name="viewport-0" step=".01">
+            <span class="unit unit-viewport">vw</span>
+            <input type="number" name="size-0" step=".01">
+            <span  class="unit unit-size">px</span>
+          </div>
+          <div class="viewport-size-pair">
+            <input type="number" name="viewport-1" step=".01">
+            <span class="unit unit-viewport">vw</span>
+            <input type="number" name="size-1" step=".01">
+            <span  class="unit unit-size">px</span>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Size units</legend>
+          <input type="radio" name="size-unit" value="px" id="px">
+          <label for="px">px</label>
+          <input type="radio" name="size-unit" value="rem" id="rem">
+          <label for="rem">rem</label>
+          <input type="radio" name="size-unit" value="em" id="em">
+          <label for="em">em</label>
+        </fieldset>
+        <fieldset>
+          <legend>Viewport units</legend>
+          <input type="radio" name="viewport-unit" value="vw" id="vw">
+          <label for="vw">vw</label>
+          <input type="radio" name="viewport-unit" value="vh" id="vh">
+          <label for="vh">vh</label>
+        </fieldset>
+        <fieldset style="display: none">
+          <legend>Conversion to px</legend>
+          <input type="number" name="to-px-conversion" id="to-px-conversion">
+        </fieldset>
+        <fieldset>
+          <input type="checkbox" name="is-clamped-min" id="is-clamped-min">
+          <label for="is-clamped-min">Clamp at min size</label>
+          <input type="checkbox" name="is-clamped-max" id="is-clamped-max">
+          <label for="is-clamped-max">Clamp at max size</label>
+        </fieldset>
+      </form>
+      <canvas class="graph" id="graph"></canvas>
+      <div class="css-output" id="css-output">
+        <p class="text"></p>
+      </div>
     </div>
-    <div id="sample"></div>
+    <div class="sample" id="sample"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
