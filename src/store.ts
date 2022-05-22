@@ -24,7 +24,7 @@ function modifyData(newProps: Partial<StateObject>) {
   const entries = Object.entries(newProps) as [keyof StateObject, any][]
 
   entries.forEach(([key, value]) => {
-    if (state[key] !== value) {
+    if (JSON.stringify(state[key]) !== JSON.stringify(value)) {
       newData[key] = value
     }
   })
