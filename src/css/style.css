@@ -53,8 +53,9 @@ input[type=number]::-webkit-outer-spin-button {
   display: inline-block;
   height: 5rem;
 }
-.form-input__fieldset--values .form-input__span{
+.form-input__unit{
   position: absolute;
+  color: #636363;
   right: .8rem;
   bottom: 1.23rem;
   /* transform: translateX(-50%); */
@@ -68,6 +69,15 @@ input[type=number]::-webkit-outer-spin-button {
   height: 100%;
   font-size: 2.1rem;
   font-weight: bold;
+}
+.form-input__input--number:focus{
+  outline: none;
+}
+.form-input__size-pair > .form-input__label--number:first-child > .form-input__input{
+  border-radius: .6rem .6rem 0 0;
+}
+.form-input__size-pair > .form-input__label--number:last-child > .form-input__input{
+  border-radius: 0 0 .6rem .6rem;
 }
 
 .graph{

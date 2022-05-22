@@ -1,4 +1,11 @@
-import { CSSSizeUnits, CSSViewportUnits, FormInput, LocalModel, StateObject, Store } from "./ts"
+import {
+  CSSSizeUnits,
+  CSSViewportUnits,
+  FormInput,
+  LocalModel,
+  StateObject,
+  Store
+} from "./ts"
 // import { kebabToCamelCase } from "./utils"
 
 const model = <LocalModel>{
