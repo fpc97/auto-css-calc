@@ -19,16 +19,32 @@ body{
 }
 @media(min-width: 768px) {
   .dashboard{
-    width: 32rem;
-    background-color: #f0f0f0;
+    width: 36rem;
+    /* background-color: #f0f0f0; */
   }
 }
 
 .form-input__fieldset{
+  padding: 0;
+  margin-bottom: 1.4rem;
   border: none;
 }
-.form-input__legend{
+.form-input__fieldset--section{
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-input__fieldset--values .form-input__legend{
   display: none;
+}
+.form-input__legend{
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+.form-input__fieldset--section > .form-input__legend{
+  font-size: 1.6rem;
+  color: #a3a3a3;
+  margin-bottom: 2rem;
 }
 input[type=number] { 
   -moz-appearance: textfield;
@@ -50,14 +66,14 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .form-input__label{
   position: relative;
-  display: inline-block;
-  height: 5rem;
+  /* display: inline-block;
+  height: 4rem; */
 }
 .form-input__unit{
   position: absolute;
-  color: #636363;
+  color: #a3a3a3;
   right: .8rem;
-  bottom: 1.23rem;
+  bottom: 0;
   /* transform: translateX(-50%); */
   pointer-events: none;
   font-size: 1.4rem;
@@ -75,9 +91,64 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .form-input__size-pair > .form-input__label--number:first-child > .form-input__input{
   border-radius: .6rem .6rem 0 0;
+  border-bottom: 1px solid #4791ff;
 }
 .form-input__size-pair > .form-input__label--number:last-child > .form-input__input{
   border-radius: 0 0 .6rem .6rem;
+}
+
+.form-input__radio{
+  display: none;
+}
+.form-input__label--radio{
+  /* position: relative; */
+  font-size: 1.8rem;
+  /* padding: 2rem; */
+  display: inline-block;
+  background-color: #E1E1E1;
+  width: 33%;
+  margin-right: -3px;
+  cursor: pointer;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.form-input__checkbox-label-pair{
+  width: 33%;
+  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+}
+.form-input__checkbox{
+  min-width: 2rem;
+  min-height: 2rem;
+  margin-right: 1rem;
+  accent-color: #4791ff;
+}
+.form-input__label--checkbox{
+  font-size: 1.6rem;
+}
+/* .form-input__label--radio{
+  display: inline-block;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+} */
+.form-input__radio:checked + .form-input__label--radio{
+  background-color: #4791FF;
+  color: white;
+}
+.form-input__label--radio:hover{
+  background-color: #eaeaea;
+}
+.form-input__label--radio:first-of-type{
+  border-radius: .6rem 0 0 .6rem;
+}
+.form-input__label--radio:last-of-type{
+  border-radius: 0 .6rem .6rem 0;
 }
 
 .graph{
