@@ -46,7 +46,7 @@ export class Observable<Data>{
  * @param {number} n The number to be clamped
  * @param {number} min The lower boundary of the output range
  * @param {number} max The upper boundary of the output range
- * @returns A number in the range [min, max]
+ * @returns {number} A number in the range [min, max]
  */
 export function clamp(n: number, min: number, max: number) {
   return Math.min(Math.max(n, min), max)
@@ -57,7 +57,7 @@ export function clamp(n: number, min: number, max: number) {
  * 
  * i.e: [1, 2, 3, 4] -> [[1, 2], [2, 3], [3, 4]]
  * @param {array} arr Array
- * @returns Array with subarrays with paired elements
+ * @returns {array} Array with subarrays with paired elements
  */
 export function getArrayPairsOf<T>(arr: T[]): [T, T][] {
   const pairs = arr.map((element, i, array) => (
@@ -73,7 +73,7 @@ export function getArrayPairsOf<T>(arr: T[]): [T, T][] {
  * 
  * i.e: my-kebab-text -> myKebabText
  * @param {string} str String to change
- * @returns String in camel case
+ * @returns {string} String in camel case
  */
 export function kebabToCamelCase(str: string): string {
   const arr = str.split('-')
@@ -81,4 +81,23 @@ export function kebabToCamelCase(str: string): string {
   const capitalString = capital.join("")
 
   return capitalString
+}
+
+/**
+ * Remove trailing zeros from a string representation of a number
+ * 
+ * i.e:
+ * - "1.450" -> "1.45"
+ * - "26.000" -> "26"
+ * @param {string} str String representing a number 
+ * @returns {string} String with number's trailing zeros removed
+ */
+export function removeTrailingZeros(str: string): string {
+  const strFloat = parseFloat(str)
+
+  if (typeof strFloat !== 'number') {
+    throw new TypeError('String provided does not represent a number')
+  }
+
+  return strFloat.toString()
 }

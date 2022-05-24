@@ -1,3 +1,4 @@
+import { removeTrailingZeros } from ".";
 import { DimensionUnitPair } from "../ts";
 import { LinearFunction } from "./linear-algebra";
 
@@ -33,8 +34,10 @@ export class Calc extends LinearFunction{
    * @returns {string} A string representing the calc() function
    */
   render() {
-    const base = `${this.intercept.toFixed(3).replace(/\.0+$/,'')}${this.sizeUnit}`
-    const increment = `${this.slope.toFixed(3).replace(/\.0+$/,'')}${this.viewportUnit}`
+    const incrementPercentage = this.slope * 100
+    
+    const base = `${removeTrailingZeros(this.intercept.toFixed(3))}${this.sizeUnit}`
+    const increment = `${removeTrailingZeros(incrementPercentage.toFixed(3))}${this.viewportUnit}`
 
     if (this.slope === 0) {
       return base
