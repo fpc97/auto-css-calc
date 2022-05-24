@@ -1,8 +1,8 @@
 import GraphCanvas from "./canvas"
 import { LocalModel, StateObject, Store } from "./ts"
 
-const CANVAS_WIDTH = 800
-const CANVAS_HEIGHT = 400
+const DEFAULT_CANVAS_WIDTH = 800
+const DEFAULT_CANVAS_HEIGHT = 400
 
 const model: LocalModel = {
   isInitialized: false
@@ -29,7 +29,13 @@ function update(newData: StateObject) {
   if (canvas.isInitialized) {
     canvas.object.update(newData)
   } else {
-    const object = new GraphCanvas(canvasHTMLElement, CANVAS_WIDTH, CANVAS_HEIGHT, newData)
+    const htmlWidth = canvasHTMLElement.getAttribute('width')
+    const htmlHeight = canvasHTMLElement.getAttribute('height')
+
+    const width = htmlWidth ? parseInt(htmlWidth) : DEFAULT_CANVAS_WIDTH
+    const height = htmlHeight ? parseInt(htmlHeight) : DEFAULT_CANVAS_HEIGHT
+
+    const object = new GraphCanvas(canvasHTMLElement, width, height, newData)
 
     Object.assign(canvas, { object, isInitialized: true })
 
