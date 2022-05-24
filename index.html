@@ -8,72 +8,92 @@
     <link rel="stylesheet" href="src/css/style.css">
   </head>
   <body>
-    <div class="dashboard">
-      <form class="form-input" id="form-input">
-        <fieldset class="form-input__fieldset form-input__fieldset--section form-input__fieldset--values">
-          <legend class="form-input__legend">Values</legend>
-          <div class="form-input__size-pair">
-            <label class="form-input__label form-input__label--number">
-              <input class="form-input__input form-input__input--number" type="number" name="viewport-0" step=".01">
-              <span class="form-input__unit">px</span>
-            </label>
-            <label class="form-input__label form-input__label--number">
-              <input class="form-input__input form-input__input--number" type="number" name="size-0" step=".01">
-              <span class="form-input__unit">px</span>
-            </label>
-          </div>
-          <div class="form-input__size-pair">
-            <label class="form-input__label form-input__label--number">
-              <input class="form-input__input form-input__input--number" type="number" name="viewport-1" step=".01">
-              <span class="form-input__unit">px</span>
-            </label>
-            <label class="form-input__label form-input__label--number">
-              <input class="form-input__input form-input__input--number" type="number" name="size-1" step=".01">
-              <span class="form-input__unit">px</span>
-            </label>
-          </div>
-        </fieldset>
-        <fieldset class="form-input__fieldset form-input__fieldset--section">
-          <legend class="form-input__legend">Units</legend>
-          <fieldset class="form-input__fieldset form-input__fieldset--size-units">
-            <legend class="form-input__legend">Size units</legend>
-            <input class="form-input__radio" type="radio" name="size-unit" value="px" id="px">
-            <label class="form-input__label form-input__label--radio" for="px">px</label>
-            <input class="form-input__radio" type="radio" name="size-unit" value="rem" id="rem">
-            <label class="form-input__label form-input__label--radio" for="rem">rem</label>
-            <input class="form-input__radio" type="radio" name="size-unit" value="em" id="em">
-            <label class="form-input__label form-input__label--radio" for="em">em</label>
+    <div class="wrapper">
+      <div class="dashboard">
+        <form class="form-input" id="form-input">
+          <fieldset class="form-input__fieldset form-input__fieldset--section form-input__fieldset--values">
+            <legend class="form-input__legend">Values</legend>
+            <div class="form-input__size-pair">
+              <label class="form-input__label form-input__label--number">
+                <input class="form-input__input form-input__input--number" type="number" name="viewport-0" step=".01">
+                <span class="form-input__unit">px</span>
+              </label>
+              <label class="form-input__label form-input__label--number">
+                <input class="form-input__input form-input__input--number" type="number" name="size-0" step=".01">
+                <span class="form-input__unit">px</span>
+              </label>
+            </div>
+            <div class="form-input__size-pair">
+              <label class="form-input__label form-input__label--number">
+                <input class="form-input__input form-input__input--number" type="number" name="viewport-1" step=".01">
+                <span class="form-input__unit">px</span>
+              </label>
+              <label class="form-input__label form-input__label--number">
+                <input class="form-input__input form-input__input--number" type="number" name="size-1" step=".01">
+                <span class="form-input__unit">px</span>
+              </label>
+            </div>
           </fieldset>
-          <fieldset class="form-input__fieldset form-input__fieldset--viewport-units">
-            <legend class="form-input__legend">Extend along</legend>
-            <input class="form-input__radio" type="radio" name="viewport-unit" value="vw" id="vw">
-            <label class="form-input__label form-input__label--radio" for="vw">Viewport width</label>
-            <input class="form-input__radio" type="radio" name="viewport-unit" value="vh" id="vh">
-            <label class="form-input__label form-input__label--radio" for="vh">Viewport height</label>
+          <fieldset class="form-input__fieldset form-input__fieldset--section">
+            <legend class="form-input__legend">Units</legend>
+            <fieldset class="form-input__fieldset form-input__fieldset--size-units">
+              <legend class="form-input__legend">Viewport units</legend>
+              <input class="form-input__radio" type="radio" name="size-unit-viewport" value="px" id="px-viewport">
+              <label class="form-input__label form-input__label--radio" for="px-viewport">px</label>
+              <input class="form-input__radio" type="radio" name="size-unit-viewport" value="rem" id="rem-viewport">
+              <label class="form-input__label form-input__label--radio" for="rem-viewport">rem</label>
+              <input class="form-input__radio" type="radio" name="size-unit-viewport" value="em" id="em-viewport">
+              <label class="form-input__label form-input__label--radio" for="em-viewport">em</label>
+            </fieldset>
+            <fieldset class="form-input__fieldset form-input__fieldset--size-units">
+              <legend class="form-input__legend">Size units</legend>
+              <input class="form-input__radio" type="radio" name="size-unit" value="px" id="px">
+              <label class="form-input__label form-input__label--radio" for="px">px</label>
+              <input class="form-input__radio" type="radio" name="size-unit" value="rem" id="rem">
+              <label class="form-input__label form-input__label--radio" for="rem">rem</label>
+              <input class="form-input__radio" type="radio" name="size-unit" value="em" id="em">
+              <label class="form-input__label form-input__label--radio" for="em">em</label>
+            </fieldset>
+            <fieldset class="form-input__fieldset form-input__fieldset--viewport-units">
+              <legend class="form-input__legend">Extend along</legend>
+              <input class="form-input__radio" type="radio" name="viewport-unit" value="vw" id="vw">
+              <label class="form-input__label form-input__label--radio" for="vw">Viewport width</label>
+              <input class="form-input__radio" type="radio" name="viewport-unit" value="vh" id="vh">
+              <label class="form-input__label form-input__label--radio" for="vh">Viewport height</label>
+            </fieldset>
+            <fieldset class="form-input__fieldset form-input__fieldset--conversion-px" style="display: none">
+              <legend class="form-input__legend">Conversion to px</legend>
+              <input class="form-input__input form-input__input--number" type="number" name="to-px-conversion" id="to-px-conversion">
+            </fieldset>
           </fieldset>
-          <fieldset class="form-input__fieldset form-input__fieldset--conversion-px" style="display: none">
-            <legend class="form-input__legend">Conversion to px</legend>
-            <input class="form-input__input form-input__input--number" type="number" name="to-px-conversion" id="to-px-conversion">
+          <fieldset class="form-input__fieldset form-input__fieldset--section">
+            <legend class="form-input__legend">Output options</legend>
+            <div class="form-input__checkbox-label-pair">
+              <input class="form-input__checkbox" type="checkbox" name="is-clamped-min" id="is-clamped-min">
+              <label class="form-input__label form-input__label--checkbox" for="is-clamped-min">Clamp at min size</label>
+            </div>
+            <div class="form-input__checkbox-label-pair">
+              <input class="form-input__checkbox" type="checkbox" name="is-clamped-max" id="is-clamped-max">
+              <label class="form-input__label form-input__label--checkbox" for="is-clamped-max">Clamp at max size</label>
+            </div>
           </fieldset>
-        </fieldset>
-        <fieldset class="form-input__fieldset form-input__fieldset--section">
-          <legend class="form-input__legend">Output options</legend>
-          <div class="form-input__checkbox-label-pair">
-            <input class="form-input__checkbox" type="checkbox" name="is-clamped-min" id="is-clamped-min">
-            <label class="form-input__label form-input__label--checkbox" for="is-clamped-min">Clamp at min size</label>
-          </div>
-          <div class="form-input__checkbox-label-pair">
-            <input class="form-input__checkbox" type="checkbox" name="is-clamped-max" id="is-clamped-max">
-            <label class="form-input__label form-input__label--checkbox" for="is-clamped-max">Clamp at max size</label>
-          </div>
-        </fieldset>
-      </form>
-      <canvas class="graph" id="graph"></canvas>
+          <fieldset class="form-input__fieldset form-input__fieldset--section">
+            <legend class="form-input__legend">Method</legend>
+            <input class="form-input__radio" type="radio" name="clamp-method" value="px" id="media-query">
+            <label class="form-input__label form-input__label--radio" for="media-query">Media query</label>
+            <input class="form-input__radio" type="radio" name="clamp-method" value="rem" id="min-max">
+            <label class="form-input__label form-input__label--radio" for="min-max">Min-max</label>
+            <input class="form-input__radio" type="radio" name="clamp-method" value="em" id="clamp">
+            <label class="form-input__label form-input__label--radio" for="clamp">Clamp</label>
+          </fieldset>
+        </form>
+      </div>
+      <canvas class="graph" id="graph" width="600" height="400"></canvas>
       <div class="css-output" id="css-output">
         <p class="css-output__text"></p>
       </div>
+      <!-- <div class="sample" id="sample"></div> -->
+      <script type="module" src="/src/main.ts"></script>
     </div>
-    <div class="sample" id="sample"></div>
-    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

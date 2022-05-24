@@ -15,7 +15,7 @@ function update(newData: StateObject) {
     return
   }
 
-  const text = baseDOMElement.getElementsByClassName('text')[0]
+  const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
 
   const calc = new Calc(newData.sizes[0], newData.sizes[1], newData.sizeUnit, newData.viewportUnit)
 

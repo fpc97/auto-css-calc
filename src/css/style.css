@@ -13,14 +13,28 @@ body{
   box-sizing: inherit;
 }
 
+.wrapper{
+  max-width: 96rem;
+  margin: 0 auto;
+}
+
 .dashboard{
   height: 100vh;
   overflow-y: auto;
 }
 @media(min-width: 768px) {
   .dashboard{
-    width: 36rem;
+    /* width: 37.5%; */
+    float: left;
+    display: inline-block;
     /* background-color: #f0f0f0; */
+  }
+
+  .graph,
+  .css-output{
+    /* float: left; */
+    width: 62%;
+    display: inline-block;
   }
 }
 
@@ -102,7 +116,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .form-input__label--radio{
   /* position: relative; */
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   /* padding: 2rem; */
   display: inline-block;
   background-color: #E1E1E1;
@@ -111,6 +125,7 @@ input[type=number]::-webkit-outer-spin-button {
   cursor: pointer;
   text-align: center;
   padding: 1rem 0;
+  /* height: 100%; */
 }
 
 .form-input__checkbox-label-pair{
@@ -122,11 +137,11 @@ input[type=number]::-webkit-outer-spin-button {
 .form-input__checkbox{
   min-width: 2rem;
   min-height: 2rem;
-  margin-right: 1rem;
   accent-color: #4791ff;
 }
 .form-input__label--checkbox{
   font-size: 1.6rem;
+  padding-left: 1rem;
 }
 /* .form-input__label--radio{
   display: inline-block;
@@ -151,6 +166,19 @@ input[type=number]::-webkit-outer-spin-button {
   border-radius: 0 .6rem .6rem 0;
 }
 
+/* Graph */
 .graph{
-  display: none;                /* Placeholder */
+  /* display: none;                Placeholder */
+}
+
+/* CSS Output */
+.css-output{
+  background-color: #4791FF;
+  padding: 2rem;
+  border-radius: .6rem;
+  /* margin: 1rem; */
+}
+.css-output__text{
+  font-size: 1.6rem;
+  color: white;
 }
