@@ -15,6 +15,55 @@ const model = <LocalModel>{
 // Form
 const form = <FormInput>document.getElementById('form-input')
 
+// UI control
+namespace SetDisabled{
+  export function conversionRate(state: boolean) {
+    const conversionRateInput = form['conversion-rate']
+
+    if (!state) {
+      conversionRateInput.setAttribute('disabled', 'true')
+    } else {
+      conversionRateInput.removeAttribute('disabled')
+    }
+  }
+
+  export function propertyName(state: boolean) {
+    const propertyNameInput = form['property-name']
+
+    // propertyNameInput.setAttribute('disabled', `${state}`)
+    if (!state) {
+      propertyNameInput.setAttribute('disabled', 'true')
+    } else {
+      propertyNameInput.removeAttribute('disabled')
+    }
+  }
+
+  export function clampMethods(state: boolean) {
+    const methodRadioElements: RadioNodeList & HTMLElement[] = form['clamp-method']
+    
+    const methodLegend = methodRadioElements[0]
+      .parentElement
+      ?.getElementsByTagName('LEGEND')[0]
+    
+    Array.from(methodRadioElements).forEach(radioElement => {
+      // radioElement.setAttribute('disabled', `${state}`)
+      if (!state) {
+        radioElement.setAttribute('disabled', 'true')
+      } else {
+        radioElement.removeAttribute('disabled')
+      }
+    })
+
+    if (methodLegend) {
+      if (state) {
+        methodLegend.classList.add('disabled')
+      } else {
+        methodLegend.classList.remove('disabled')
+      }
+    }
+  }
+}
+
 // User input
 function handleFormChange(this: HTMLFormElement, e: Event) {
   const currentTarget = <typeof e.currentTarget & HTMLInputElement>e.target
@@ -37,24 +86,66 @@ function handleFormChange(this: HTMLFormElement, e: Event) {
         [parseInt(target['viewport-1'].value), parseInt(target['size-1'].value)]
       ]
       break
-    case 'to-px-conversion':
-      newDataObject.toPxConversion = parseFloat(currentTarget.value)
+    case 'viewport-unit':
+
       break
     case 'size-unit':
-      newDataObject.sizeUnit = <CSSSizeUnits>currentTarget.value
 
-      const conversionInput = this['to-px-conversion']
-      const isHideConversion = currentTarget.value === 'px'
-
-      toggleDisplayFieldsetOf(conversionInput, isHideConversion)
       break
-    case 'viewport-unit':
-      newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
+    case 'follow-conversion':
+      
+      // Form UI disable/enable
+      SetDisabled.conversionRate(currentTarget.checked)
+      break
+    case 'conversion-rate':
+      newDataObject.toPxConversion = parseFloat(currentTarget.value)
+      break
+    // case 'size-unit':
+    //   newDataObject.sizeUnit = <CSSSizeUnits>currentTarget.value
+
+    //   const conversionInput = this['to-px-conversion']
+    //   const isHideConversion = currentTarget.value === 'px'
+
+    //   toggleDisplayFieldsetOf(conversionInput, isHideConversion)
+    //   break
+    // case 'viewport-unit':
+    //   newDataObject.viewportUnit = <CSSViewportUnits>currentTarget.value
+    //   break
+    case 'growth-unit':
+
+      break
+    case 'use-property':
+      // Form UI disable/enable
+      SetDisabled.propertyName(currentTarget.checked)
+
+      if (!currentTarget.checked) {
+        SetDisabled.clampMethods(false)
+        form['is-clamped-min'].checked = false
+        form['is-clamped-max'].checked = false
+      }
+      break
+    case 'property-name':
+
       break
     case 'is-clamped-min':
     case 'is-clamped-max':
       const key = currentTargetName === 'is-clamped-max' ? 'isClampedMax' : 'isClampedMin'
       newDataObject[key] = <boolean>currentTarget.checked
+
+      // Form UI disable/enable
+      if (currentTarget.checked) {
+        SetDisabled.propertyName(true)
+        SetDisabled.clampMethods(true)
+        form['use-property'].checked = true
+      } else if (
+        !form['is-clamped-min'].checked
+        && !form['is-clamped-max'].checked
+      ) {
+        SetDisabled.clampMethods(false)
+      }
+      break
+    case 'clamp-method':
+
       break
     default:
       return

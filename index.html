@@ -15,7 +15,8 @@
           <div class="measure-icons">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 42"><path d="M116 5v32a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h11v21h6V0h11v9h6V0h15v9h6V0h13v9h6V0h14v21h6V0h12a5 5 0 0 1 5 5Z"/></svg>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 90"><path d="M111 0H5a5 5 0 0 0-5 5v62a5 5 0 0 0 5 5h106a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5ZM94 38v-9H22v9L11 27l11-11v9h72v-9l11 11Z"/><path d="M42 65h32v17H42z"/><path d="M28 79h60v11H28z"/></svg>
-          </div><div class="size-pair">
+          </div><!--
+          --><div class="size-pair">
             <label>
               <input type="number" name="viewport-0" step=".01">
               <span>px</span>
@@ -24,7 +25,8 @@
               <input type="number" name="size-0" step=".01">
               <span>px</span>
             </label>
-          </div><div class="size-pair">
+          </div><!--
+          --><div class="size-pair">
             <label>
               <input type="number" name="viewport-1" step=".01">
               <span>px</span>
@@ -33,13 +35,14 @@
               <input type="number" name="size-1" step=".01">
               <span>px</span>
             </label>
-          </div><div class="unit-lists">
-            <select>
+          </div><!--
+          --><div class="unit-lists">
+            <select name="viewport-unit">
               <option value="px">px</option>
               <option value="rem">rem</option>
               <option value="em">em</option>
             </select>
-            <select>
+            <select name="size-unit">
               <option value="px">px</option>
               <option value="rem">rem</option>
               <option value="em">em</option>
@@ -61,14 +64,14 @@
           <legend class="form-input__legend">Output options</legend>
           <fieldset>
             <legend>Extend along</legend>
-            <input type="radio" name="viewport-unit" value="vw" id="vw"><!--
+            <input type="radio" name="growth-unit" value="vw" id="vw"><!--
             --><label for="vw">Width</label><!--
-            --><input type="radio" name="viewport-unit" value="vh" id="vh"><!--
+            --><input type="radio" name="growth-unit" value="vh" id="vh"><!--
             --><label for="vh">Height</label>
           </fieldset>
           <div class="checkbox-label-pair row">
-            <input type="checkbox" name="calc-only" id="calc-only" checked>
-            <label for="calc-only">Use property</label>
+            <input type="checkbox" name="use-property" id="use-property">
+            <label for="use-property">Use property</label>
           </div>
           <br />
           <input type="text" name="property-name" id="property-name" value="font-size" disabled><!--
