@@ -1,20 +1,11 @@
 import { StateObject } from "./ts"
-import { Observable } from "./utils"
-import { retrieveLocalData, saveLocalData } from "./utils/local-storage"
+import { clamp, clampMargin, Observable } from "./utils"
+import { retrieveDefaultData, retrieveLocalData, saveLocalData } from "./utils/local-storage"
 
+export const MAX_SIZE = 9999
+export const MAX_VIEWPORT = 9999
 
-const state: StateObject = retrieveLocalData() || {
-  sizeUnit: 'px',
-  viewportUnit: 'vw',
-  sizes: [
-    [200, 14],
-    [400, 21]
-  ],
-  toPxConversion: 16,
-  isClampedMin: false,
-  isClampedMax: false
-}
-Object.seal(state)
+const state: StateObject = retrieveLocalData() || retrieveDefaultData()
 
 const observable = new Observable<StateObject>()
 
@@ -30,6 +21,22 @@ function modifyData(newProps: Partial<StateObject>) {
   })
 
   if (newData.sizes) {
+    if (newData.sizes[0][0] !== state.sizes[0][0]) {
+      newData.sizes[0][0] = clamp(newData.sizes[0][0], 0, newData.sizes[1][0] - 1)
+    }
+    if (newData.sizes[1][0] !== state.sizes[1][0]) {
+      newData.sizes[1][0] = clamp(newData.sizes[1][0], newData.sizes[0][0] - 1, MAX_VIEWPORT)
+    }
+    
+    if (newData.sizes[0][1] !== state.sizes[0][1]) {
+      newData.sizes[0][1] = clamp(newData.sizes[0][1], 0, MAX_SIZE)
+    }
+    if (newData.sizes[1][1] !== state.sizes[1][1]) {
+      newData.sizes[1][1] = clamp(newData.sizes[1][1], 0, MAX_SIZE)
+    }
+  }
+
+  if (newData.sizes) {
     newData.sizes[0][0] = parseFloat(newData.sizes[0][0].toFixed(2))
     newData.sizes[0][1] = parseFloat(newData.sizes[0][1].toFixed(2))
     newData.sizes[1][0] = parseFloat(newData.sizes[1][0].toFixed(2))
@@ -39,7 +46,6 @@ function modifyData(newProps: Partial<StateObject>) {
   if (Object.entries(newData).length === 0) {
     return
   }
-
   Object.assign(state, newData)
   observable.notify(state)
   saveLocalData(state)

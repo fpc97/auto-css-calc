@@ -1,10 +1,11 @@
 import { CSSSizeUnits, CSSViewportUnits, DimensionUnitPair, StateObject } from "./ts";
 import { clamp, getArrayPairsOf } from "./utils";
-import { LinearFunction, Point } from "./utils/linear-algebra";
+import { LinearFunction, Point } from "./lib/linear-algebra";
+import { MAX_SIZE, MAX_VIEWPORT } from './store'
 
-/* This deals in 2 coord systems:
-Virtual units   - Axis system representation    - 1 unit =/= 1px
-Element units   - Position relative to element  - 1 unit =   1px
+/* This deals in 2 coordinate systems:
+Virtual units   - Axis system representation        - 1 unit =/= 1px
+Element units   - Position relative to DOM element  - 1 unit =   1px
 
 Sometimes the term "Relative unit" is used to refer to units that
 can be applied to both systems
@@ -13,9 +14,9 @@ can be applied to both systems
 export default class GraphCanvas{
   // Macros ---
   /** Virtual unit */
-  private static readonly MAX_VIRTUAL_WIDTH = 1600;
+  private static readonly MAX_VIRTUAL_WIDTH = MAX_SIZE || Infinity;
   /** Virtual unit */
-  private static readonly MAX_VIRTUAL_HEIGHT = 1000;
+  private static readonly MAX_VIRTUAL_HEIGHT = MAX_VIEWPORT || Infinity;
   /** Virtual unit */
   private static readonly MIN_VIRTUAL_WIDTH = 100;
   /** Virtual unit */
@@ -34,7 +35,7 @@ export default class GraphCanvas{
    * Element unit
    * 
    * Delimits the space where the x ruler will stop */
-  private static readonly MARGIN_TOP = 20;
+  private static readonly MARGIN_TOP = 30;
   /**
    * Element unit
    * 
@@ -44,12 +45,20 @@ export default class GraphCanvas{
    * Element unit
    * 
    * Distance at which cursor snaps to points */
-  private static readonly SNAP_DISTANCE_POINT = 15;
+  private static readonly SNAP_DISTANCE_POINT = 20;
   /**
    * Element unit
    * 
    * Distance at which cursor snaps to lines */
-  private static readonly SNAP_DISTANCE_LINE = 8;
+  private static readonly SNAP_DISTANCE_LINE = 15;
+
+  /** Element unit */
+  private static readonly POINT_CIRCLE_RADIUS = 5;
+
+  /** Element unit */
+  private static readonly INFO_LABEL_WIDTH = 155;
+  /** Element unit */
+  private static readonly INFO_LABEL_HEIGHT = 50;
 
   /**
    * Virtual unit
@@ -67,7 +76,19 @@ export default class GraphCanvas{
    * Minimum space (in px) rulers can have between markings */
   private static readonly MIN_RULER_SPACING = 40;
   private static readonly RULER_MARKING_LENGTH = 8;
-  // private static readonly RULER_MARKING_THICKNESS = 1;
+
+  /**
+   * Virtual unit
+   * 
+   * Minimum horizontal distance between p1 and p2
+   */
+  private static readonly POINT_MARGIN = 1;
+  
+  private static readonly COLOR_MAIN        = '#4791ff';
+  private static readonly COLOR_MAIN_MID    = '#a5c9ff';
+  private static readonly COLOR_MAIN_SOFT   = '#eeeeee';
+  private static readonly COLOR_BACKGROUND  = '#ffffff';
+  private static readonly COLOR_HIGHLIGHT   = '#FFAEA3';
 
   /**
    * Relative unit
@@ -80,9 +101,11 @@ export default class GraphCanvas{
    */
   private static readonly VIEWPORT_MODIFY_INCREMENT = .01;
 
+
   // Canvas elements ---
   private readonly htmlElement: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
+
 
   // Points set by internal handlers ---
   /** Virtual unit */
@@ -140,11 +163,11 @@ export default class GraphCanvas{
    */
   private virtualHeight: number;
 
-  // Properties passed exclusively externally
+  // Properties passed externally
   private isClampedMin: boolean;
   private isClampedMax: boolean;
   private cssUnitSize: CSSSizeUnits;
-  private cssUnitViewport: CSSViewportUnits;
+  private cssUnitGrowth: CSSSizeUnits;
 
   // Cursor info
   /** Indicates if cursor is hovering the canvas */
@@ -178,7 +201,10 @@ export default class GraphCanvas{
   private isReduceY: boolean;
 
   // Getters
-  /** */
+  /**
+   * Get DOM element's boundary box
+   * 
+  */
   private get boundingRect() {
     return this.htmlElement.getBoundingClientRect()
   }
@@ -189,19 +215,24 @@ export default class GraphCanvas{
    * Width of the section of the canvas belonging to the axis system
    */
   private get gridWidth() {
-    return this.boundingRect.width - GraphCanvas.MARGIN_LEFT - GraphCanvas.MARGIN_RIGHT
+    return this.boundingRect.width
+      - GraphCanvas.MARGIN_LEFT
+      - GraphCanvas.MARGIN_RIGHT
   }
+
   /**
    * Element unit
    * 
    * Height of the section of the canvas belonging to the axis system
    */
   private get gridHeight() {
-    return this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM - GraphCanvas.MARGIN_TOP
+    return this.boundingRect.height
+      - GraphCanvas.MARGIN_BOTTOM
+      - GraphCanvas.MARGIN_TOP
   }
 
   // Change listeners
-  /** Array to store the functions to be called when the canvas is updated */
+  /** Function to be called when the canvas is updated */
   private changeListener: null | ((newData: Partial<StateObject>) => void);
  
   /**
@@ -235,7 +266,7 @@ export default class GraphCanvas{
     this.isClampedMin = configObject.isClampedMin
     this.isClampedMax = configObject.isClampedMax
     this.cssUnitSize = configObject.sizeUnit
-    this.cssUnitViewport = configObject.viewportUnit
+    this.cssUnitGrowth = configObject.viewportUnit
 
     this.pStart = {x: 0, y: 0}
     this.pEnd = {x: 0, y: 0}
@@ -283,14 +314,46 @@ export default class GraphCanvas{
    * Update virtual width and height to cover the current p1 and p2 positions
    */
   private setVirtualDimensionsFromPoints() {
-    const lowerInY = Math.min(this.p1.y, this.p2.y)
-    const higherInY = Math.max(this.p1.y, this.p2.y)
+    const lowerY = Math.min(this.p1.y, this.p2.y)
+    const higherY = Math.max(this.p1.y, this.p2.y)
 
-    const spaceRight = Math.max(this.p1.x, this.p2.x * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2)
-    const spaceTop  = Math.max(lowerInY, higherInY * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2)
+    const shouldDimensionsUpdate = this.p1.x < 0
+      || this.p2.x > this.virtualWidth
+      || this.p1.y > this.virtualHeight + 1
+      || this.p2.y > this.virtualHeight + 1
+      // Or maybe the frame is too scaled out
+      || this.p2.x < this.virtualWidth * .2
+      || higherY < this.virtualHeight * .2
 
-    const newWidth = Math.min(this.p1.x + this.p2.x - this.p1.x + spaceRight, GraphCanvas.MAX_VIRTUAL_WIDTH)
-    const newHeight = Math.min(lowerInY + higherInY - lowerInY + spaceTop, GraphCanvas.MAX_VIRTUAL_HEIGHT)
+    if (!shouldDimensionsUpdate) return
+
+    const spaceRight = Math.max(
+      this.p1.x,
+      this.p2.x * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2
+    )
+    const spaceTop = Math.max(
+      lowerY,
+      higherY * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2
+    )
+
+    const newWidth = clamp(
+      this.p1.x + this.p2.x - this.p1.x + spaceRight,
+      GraphCanvas.MIN_VIRTUAL_WIDTH,
+      GraphCanvas.MAX_VIRTUAL_WIDTH
+    )
+    // Math.min(
+    //   this.p1.x + this.p2.x - this.p1.x + spaceRight,
+    //   GraphCanvas.MAX_VIRTUAL_WIDTH
+    // )
+    const newHeight = clamp(
+      lowerY + higherY - lowerY + spaceTop,
+      GraphCanvas.MIN_VIRTUAL_HEIGHT,
+      GraphCanvas.MAX_VIRTUAL_HEIGHT
+    )
+    // Math.min(
+    //   lowerY + higherY - lowerY + spaceTop,
+    //   GraphCanvas.MAX_VIRTUAL_HEIGHT
+    // )
 
     this.virtualWidth = newWidth
     this.virtualHeight = newHeight
@@ -305,12 +368,14 @@ export default class GraphCanvas{
       return
     }
 
-    this.isExtendX = this[this.highlightedPoint].x > this.virtualWidth - this.virtualWidth * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
+    this.isExtendX = this[this.highlightedPoint].x
+      > this.virtualWidth - this.virtualWidth * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
     this.isReduceX = !this.isExtendX
       && this[this.highlightedPoint].x < this.virtualWidth * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
       && this[this.nonHighlightedPoint].x < this.virtualWidth
 
-    this.isExtendY = this[this.highlightedPoint].y > this.virtualHeight - this.virtualHeight * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
+    this.isExtendY = this[this.highlightedPoint].y
+      > this.virtualHeight - this.virtualHeight * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
     this.isReduceY = !this.isExtendY
       && this[this.highlightedPoint].y < this.virtualHeight * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER
       && this[this.nonHighlightedPoint].y < this.virtualHeight
@@ -324,15 +389,18 @@ export default class GraphCanvas{
    */
   private movePoint(pName: 'p1' | 'p2', newCoords: Point, isClamped: boolean = true) {
     const horizontalLimits = pName === 'p1'
-      ? [0, this.p2.x - 1]
-      : [this.p1.x + 1, this.virtualWidth]
+      ? [0, this.p2.x - GraphCanvas.POINT_MARGIN]
+      : [this.p1.x + GraphCanvas.POINT_MARGIN, this.virtualWidth]
+
+    const xRounded = Math.round(newCoords.x * 100) / 100
+    const yRounded = Math.round(newCoords.y * 100) / 100
 
     const xFinal = isClamped
-      ? clamp(newCoords.x, horizontalLimits[0], horizontalLimits[1])
-      : newCoords.x
+      ? clamp(xRounded, horizontalLimits[0], horizontalLimits[1])
+      : xRounded
     const yFinal = isClamped
-      ? clamp(newCoords.y, 0, this.virtualHeight)
-      : newCoords.y
+      ? clamp(yRounded, 0, this.virtualHeight)
+      : yRounded
     
     this[pName] = new Point(xFinal, yFinal)
   }
@@ -347,7 +415,9 @@ export default class GraphCanvas{
     const centerLinearFunction = new LinearFunction(this.p1, this.p2)
 
     // Start ---
-    const startIntercept = this.isClampedMin ? this.p1.y : centerLinearFunction.intercept
+    const startIntercept = this.isClampedMin
+      ? this.p1.y
+      : centerLinearFunction.intercept
     const startIntersectionPoints = [new Point(0, startIntercept)]
 
     if (!this.isClampedMin) {
@@ -355,11 +425,15 @@ export default class GraphCanvas{
         ? this.virtualHeight
         : 0
 
-      const verticalPoint = new Point(centerLinearFunction.getXFromY(verticalLimit), verticalLimit)
+      const verticalPoint = new Point(
+        centerLinearFunction.getXFromY(verticalLimit),
+        verticalLimit
+      )
 
       startIntersectionPoints.push(verticalPoint)
       startIntersectionPoints.sort((intersectionA, intersectionB) => (
-        Point.distanceBetween(intersectionA, this.p1) - Point.distanceBetween(intersectionB, this.p1)
+        Point.distanceBetween(intersectionA, this.p1)
+        - Point.distanceBetween(intersectionB, this.p1)
       ))
     }
 
@@ -416,7 +490,9 @@ export default class GraphCanvas{
     //   this.isCursorIn = false
     // }
     
-    this.cursorCoords = this.viewportToElementCoords(new Point(cursorViewportX, cursorViewportY))
+    this.cursorCoords = this.viewportToElementCoords(
+      new Point(cursorViewportX, cursorViewportY)
+    )
   }
 
   /**
@@ -460,7 +536,8 @@ export default class GraphCanvas{
               GraphCanvas.MIN_VIRTUAL_WIDTH
             )
           : GraphCanvas.MIN_VIRTUAL_WIDTH
-        const newWidth = this.virtualWidth + this.virtualWidth * GraphCanvas.VIEWPORT_MODIFY_INCREMENT * modifyVector[0]
+        const newWidth = this.virtualWidth
+          + this.virtualWidth * GraphCanvas.VIEWPORT_MODIFY_INCREMENT * modifyVector[0]
         const newWidthClamped = clamp(newWidth, minLimit, GraphCanvas.MAX_VIRTUAL_WIDTH)
 
         this.virtualWidth = newWidthClamped
@@ -473,10 +550,12 @@ export default class GraphCanvas{
 
       if (modifyVector[1] !== 0) {
         const minLimit = Math.max(
-          this[nonHighlightedPoint].y + this.virtualHeight * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2,
+          this[nonHighlightedPoint].y
+            + this.virtualHeight * GraphCanvas.EXTENSION_MARGIN_MULTIPLIER * 2,
           GraphCanvas.MIN_VIRTUAL_HEIGHT
         )
-        const newHeight = this.virtualHeight + this.virtualHeight * GraphCanvas.VIEWPORT_MODIFY_INCREMENT * modifyVector[1]
+        const newHeight = this.virtualHeight
+          + this.virtualHeight * GraphCanvas.VIEWPORT_MODIFY_INCREMENT * modifyVector[1]
         const newHeightClamped = clamp(newHeight, minLimit, GraphCanvas.MAX_VIRTUAL_HEIGHT)
 
         this.virtualHeight = newHeightClamped
@@ -596,7 +675,10 @@ export default class GraphCanvas{
         Point.distanceBetween(this.cursorCoords, this.virtualToElementCoords(this.p2))
       ]
 
-      if (pointDistances[0] <= GraphCanvas.SNAP_DISTANCE_POINT) {
+      if (
+        pointDistances[0] <= GraphCanvas.SNAP_DISTANCE_POINT
+        && pointDistances[0] < pointDistances[1]
+      ) {
         this.highlightedPoint = 'p1'
         doRefresh = true
       } else if (pointDistances[1] <= GraphCanvas.SNAP_DISTANCE_POINT) {
@@ -611,30 +693,58 @@ export default class GraphCanvas{
     if (doRefresh) {
       this.refresh()
     }
+
+    // CSS - works together with mouseDown and mouseUp
+    // Grabbing cursors ~ for the old dogs out there 👴
+    if (this.highlightedPoint) {
+      if (this.isPointSelected) {
+        this.htmlElement.style.cursor = 'grabbing'  
+      } else {
+        this.htmlElement.style.cursor = 'grab'  
+      }
+    } else {
+      this.htmlElement.style.cursor = 'default'
+    }
   }
 
+  /**
+   * Listener for mousedown event
+   */
   private handleMouseDown() {
     if (this.highlightedPoint !== null) {
       this.isPointSelected = true
+
+      // CSS - works together with mouseMove and mouseUp
+      this.htmlElement.style.cursor = 'grabbing'
     }
   }
 
+  /**
+   * Listener for mouseup event
+   */
   private handleMouseUp() {
-    if (this.changeListener !== null) {
-      const newSizes: [DimensionUnitPair, DimensionUnitPair] = [
-        [this.p1.x, this.p1.y],
-        [this.p2.x, this.p2.y]
-      ]
-
-      this.changeListener({ sizes: newSizes })
-    }
-    
     if (this.isPointSelected) {
       this.isPointSelected = false
-    }
+      
+      if (this.changeListener !== null) {
+        const newSizes: [DimensionUnitPair, DimensionUnitPair] = [
+          [this.p1.x, this.p1.y],
+          [this.p2.x, this.p2.y]
+        ]
 
-    if (typeof this.extendIntervalId === 'number') {
-      this.stopExtensionLoop()
+        this.changeListener({ sizes: newSizes })
+      }
+
+      if (typeof this.extendIntervalId === 'number') {
+        this.stopExtensionLoop()
+      }
+
+      // CSS - works together with mouseMove and mouseDown
+      if (this.highlightedPoint) {
+        this.htmlElement.style.cursor = 'grab'
+      } else {
+        this.htmlElement.style.cursor = 'default'
+      }
     }
   }
 
@@ -646,24 +756,41 @@ export default class GraphCanvas{
     // is never identity thus visually the nearest distance between cursor and
     // a line is never perpendicular to that line
     const points = [this.pStart, this.p1, this.p2, this.pEnd]
-    const pointsElement = points.map(point => this.virtualToElementCoords(point))
+    const pointsElement = points.map(point => (
+      this.virtualToElementCoords(point)
+    ))
 
     const ranges = getArrayPairsOf(pointsElement)
 
-    const linearFunctions = ranges.map(([start, end]) => new LinearFunction(start, end))
-
-    const rangeDistances = linearFunctions.map((linearFunction, i) => (
-      linearFunction.distanceToPointInRange(this.cursorCoords, ranges[i][0].x, ranges[i][1].x))
+    const linearFunctions = ranges.map(([start, end]) => (
+      new LinearFunction(start, end))
     )
 
-    const isInSnappingDistance = rangeDistances.some(distance => distance <= GraphCanvas.SNAP_DISTANCE_LINE)
+    const rangeDistances = linearFunctions.map((linearFunction, i) => (
+      linearFunction.distanceToPointInRange(
+        this.cursorCoords,
+        ranges[i][0].x,
+        ranges[i][1].x
+      ))
+    )
+
+    const isInSnappingDistance = rangeDistances.some(distance => (
+      distance <= GraphCanvas.SNAP_DISTANCE_LINE
+    ))
 
     if (isInSnappingDistance) {
-      const nearestLineDistance = rangeDistances.map((distance, i) => [i, distance])
-        .sort((distTupleA, distTupleB) => distTupleA[1] - distTupleB[1])[0]
+      const nearestLineDistance = rangeDistances
+        .map((distance, i) => (
+          [i, distance]
+        ))
+        .sort((distTupleA, distTupleB) => (
+          distTupleA[1] - distTupleB[1]
+        ))[0]
       
       const nearestPointDistance = pointsElement
-        .map(point => [point, Point.distanceBetween(point, this.cursorCoords)] as [Point, number])
+        .map(point => (
+          [point, Point.distanceBetween(point, this.cursorCoords)] as [Point, number]
+        ))
         .sort((distTupleA, distTupleB) => distTupleA[1] - distTupleB[1])[0]
       
       const isCorner = nearestPointDistance[1] === nearestLineDistance[1]
@@ -701,8 +828,12 @@ export default class GraphCanvas{
    * @returns {number} Respective virtual units
    */
   private elementToVirtualUnits(dimension: 'x' | 'y', absoluteElementUnit: number): number {
-    const virtualSize = dimension === 'x' ? this.virtualWidth : this.virtualHeight
-    const gridSize = dimension === 'x' ? this.gridWidth : this.gridHeight
+    const virtualSize = dimension === 'x'
+      ? this.virtualWidth
+      : this.virtualHeight
+    const gridSize = dimension === 'x'
+      ? this.gridWidth
+      : this.gridHeight
 
     return absoluteElementUnit * (virtualSize / gridSize)
   }
@@ -714,8 +845,12 @@ export default class GraphCanvas{
    * @returns {number} Respective element units
    */
   private virtualToElementUnits(dimension: 'x' | 'y', virtualUnit: number): number {
-    const virtualSize = dimension === 'x' ? this.virtualWidth : this.virtualHeight
-    const gridSize = dimension === 'x' ? this.gridWidth : this.gridHeight
+    const virtualSize = dimension === 'x'
+      ? this.virtualWidth
+      : this.virtualHeight
+    const gridSize = dimension === 'x'
+      ? this.gridWidth
+      : this.gridHeight
 
     return virtualUnit / (virtualSize / gridSize)
   }
@@ -723,7 +858,7 @@ export default class GraphCanvas{
   /**
    * Adapt viewport coordinates to local element coordinates
    * @param {Point} absoluteViewportCoords Point in viewport
-   * @returns Respective point relative to viewport
+   * @returns {Point} Point's position relative to DOM element
    */
   private viewportToElementCoords(absoluteViewportCoords: Point) {
     return new Point(
@@ -733,20 +868,27 @@ export default class GraphCanvas{
   }
 
   /**
-   * Get coordinates of virtual axis system point to its relative position in HTML Element
+   * Get coordinates of virtual axis system point in its relative position in DOM element
    * @param {Point} virtualCoords Point in virtual axis system
-   * @returns Respective point in HTML Element
+   * @returns {Point} Point's position relative to DOM element
    */
   private virtualToElementCoords(virtualCoords: Point) {
     /** Virtual Y represented from top to bottom */
     const virtualYInverse = (this.virtualHeight - virtualCoords.y)
 
-    const elementRelativeX = this.virtualToElementUnits('x', virtualCoords.x) + GraphCanvas.MARGIN_LEFT
-    const elementRelativeY = this.virtualToElementUnits('y', virtualYInverse) + GraphCanvas.MARGIN_TOP
+    const elementRelativeX = this.virtualToElementUnits('x', virtualCoords.x)
+      + GraphCanvas.MARGIN_LEFT
+    const elementRelativeY = this.virtualToElementUnits('y', virtualYInverse)
+      + GraphCanvas.MARGIN_TOP
 
     return new Point(elementRelativeX, elementRelativeY)
   }
 
+  /**
+   * Get relative coordinates from DOM element in its position in virtual axis system
+   * @param {Point} elementCoords Point relative to DOM element
+   * @returns {Point} Point's position in virtual axis system
+   */
   private elementToVirtualCoords(elementCoords: Point) {
     /** Virtual Y represented from top to bottom */
     const virtualX = this.elementToVirtualUnits('x', elementCoords.x - GraphCanvas.MARGIN_LEFT)
@@ -779,12 +921,27 @@ export default class GraphCanvas{
    * @param {Point} pA Point A
    * @param {Point} pB Point B
    */
-  private drawLine(pA: Point, pB: Point) {
+  private drawLine(
+    pA: Point,
+    pB: Point,
+    config?: {
+      color?: string | CanvasGradient | CanvasPattern,
+      lineWidth?: number
+    }
+  ) {
+    const fillStylePrev = this.ctx.fillStyle
+    const lineWidthPrev = this.ctx.lineWidth
+    this.ctx.strokeStyle = config?.color || fillStylePrev
+    this.ctx.lineWidth = config?.lineWidth || lineWidthPrev
+
     this.ctx.beginPath()
     this.ctx.moveTo(Math.round(pA.x), Math.round(pA.y))
     this.ctx.lineTo(Math.round(pB.x), Math.round(pB.y))
     this.ctx.closePath()
     this.ctx.stroke()
+
+    this.ctx.fillStyle = fillStylePrev
+    this.ctx.lineWidth = lineWidthPrev
   }
 
   /**
@@ -792,57 +949,100 @@ export default class GraphCanvas{
    * @param {string} text The text to be written
    * @param {Point} p Point where to write the text
    */
-  private drawText(text: string, p: Point, textAlign: CanvasTextAlign = 'left') {
-    const textAlignDefault = this.ctx.textAlign
+  private drawText(
+    text: string,
+    p: Point,
+    config?: {
+      color?: string | CanvasGradient | CanvasPattern,
+      textAlign?: CanvasTextAlign,
+      font?: string
+    }
+  ) {
+    const fillStylePrev = this.ctx.fillStyle
+    const textAlignPrev = this.ctx.textAlign
+    const fontPrev = this.ctx.font
+    
+    const color = config?.color || fillStylePrev
+    const textAlign = config?.textAlign || textAlignPrev
+    const font = config?.font || fontPrev
 
+    this.ctx.fillStyle = color
     this.ctx.textAlign = textAlign
+    this.ctx.font = font
     this.ctx.fillText(text, p.x, p.y)
 
-    this.ctx.textAlign = textAlignDefault
+    this.ctx.fillStyle = fillStylePrev
+    this.ctx.textAlign = textAlignPrev
+    this.ctx.font = fontPrev
+  }
+
+  /**
+   * Draw a rectangle
+   * @param {Point} topLeft Top left coordinate of the rectangle
+   * @param {Point} bottomRight Bottom right coordinate of the rectangle
+   */
+  private drawRect(p: Point, width: number, height: number, color: typeof this.ctx.fillStyle = 'black') {
+    const fillStylePrev = this.ctx.fillStyle
+
+    this.ctx.fillStyle = color
+    this.ctx.beginPath()
+    this.ctx.rect(p.x, p.y, width, height)
+    this.ctx.fill()
+
+    this.ctx.fillStyle = fillStylePrev
   }
 
   /**
    * Draw square representing a point
    * @param {Point} p Point where the center of the square will be
    * @param {number} side Length of the sides of the square
+   * @param {string} color Color of the square
    */
-  private drawPointSquare(p: Point, side: number = 20, color: typeof this.ctx.fillStyle = 'black') {
-    const offsetOrigin = new Point(p.x - side/2, p.y - side/2)
+  // private drawPointSquare(p: Point, side: number = 20, color: typeof this.ctx.fillStyle = 'black') {
+  //   const offsetOrigin = new Point(p.x - side/2, p.y - side/2)
+  //   const fillStylePrev = this.ctx.fillStyle
+
+  //   this.ctx.fillStyle = color
+  //   this.ctx.fillRect(offsetOrigin.x, offsetOrigin.y, side, side)
+
+  //   this.ctx.fillStyle = fillStylePrev
+  // }
+
+  /**
+   * Draw circle representing a point
+   * @param {Point} p Point where the center of the circle will be
+   * @param {number} radius Length of the sides of the circle
+   * @param {string} color Color of the circle
+   */
+  private drawPointCircle(
+    p: Point,
+    config?: {
+      radius?: number,
+      color?: string | CanvasGradient | CanvasPattern
+    }
+  ) {
     const fillStylePrev = this.ctx.fillStyle
+    const radius = config?.radius || 20
 
-    this.ctx.fillStyle = color
-    this.ctx.fillRect(offsetOrigin.x, offsetOrigin.y, side, side)
+    this.ctx.fillStyle = config?.color || fillStylePrev
 
+    this.ctx.beginPath()
+    this.ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI)
+    this.ctx.closePath()
+
+    this.ctx.fill()
     this.ctx.fillStyle = fillStylePrev
   }
 
+  /**
+   * Draw graph
+   */
   private draw() {
-    this.ctx.clearRect(0, 0, this.htmlElement.width, this.htmlElement.height)
+    this.ctx.clearRect(0, 0, this.boundingRect.width, this.boundingRect.width)
     // const fillStylePrev = this.ctx.fillStyle
 
-    // Draw lines
-    const pointSequence = [this.pStart, this.p1, this.p2, this.pEnd]
-    pointSequence.map(p => this.virtualToElementCoords(p))
-      .reduce((a, b) => {
-        this.drawLine(a, b)
-        return b
-      })
-
-    // Draw snapped point
-    if (this.lineSnappedCursor !== null) {
-      this.drawPointSquare(this.lineSnappedCursor, 10)
-    }
-
-    // Draw points
-    const colors = [
-      this.highlightedPoint === 'p1' ? 'red' : 'black',
-      this.highlightedPoint === 'p2' ? 'red' : 'black'
-    ]
-
-    this.drawPointSquare(this.virtualToElementCoords(this.p1), 20, colors[0])
-    this.drawPointSquare(this.virtualToElementCoords(this.p2), 20, colors[1])
-    
     // Draw rulers
+
     // this.ctx.fillStyle = 'white'
     // this.ctx.fillRect(0, 0, GraphCanvas.MARGIN_LEFT, this.boundingRect.height)
     // this.ctx.fillRect(
@@ -853,63 +1053,250 @@ export default class GraphCanvas{
     // )
     // this.ctx.fillStyle = fillStylePrev
 
-    const markingLengthX = this.elementToVirtualUnits('y', GraphCanvas.RULER_MARKING_LENGTH)
+    const markingLengthX = this.elementToVirtualUnits(
+      'y',
+      GraphCanvas.RULER_MARKING_LENGTH
+    )
     for (let i = 0; i < this.virtualWidth; i += this.rulerSpacing.x) {
-      const lineStart = this.virtualToElementCoords(new Point(i, 0))
-      const lineEnd = this.virtualToElementCoords(new Point(i, 0 - markingLengthX))
+      // Markings
+      const markStart = this.virtualToElementCoords(new Point(i, 0))
+      const markEnd = this.virtualToElementCoords(
+        new Point(i, 0 - markingLengthX)
+      )
 
-      this.drawLine(
-        lineStart,
-        lineEnd
-      )
+      // Don't draw first marking on X axis
+      if (i) {
+        this.drawLine(
+          markStart,
+          markEnd
+        )
+      }
       this.drawText(
-        i.toString(),
-        new Point(lineEnd.x, lineEnd.y + 10)
+        (Math.round(i * 100) / 100).toString(),
+        new Point(markEnd.x, markEnd.y + 10)
       )
+
+      // Lines
+      if (i) {
+        const lineEnd = this.virtualToElementCoords(new Point(i, this.virtualHeight))
+        this.drawLine(
+          markStart,
+          lineEnd,
+          { color: GraphCanvas.COLOR_MAIN_SOFT }
+        )
+      }
     }
 
-    const markingLengthY = this.elementToVirtualUnits('x', GraphCanvas.RULER_MARKING_LENGTH)
+    const markingLengthY = this.elementToVirtualUnits(
+      'x',
+      GraphCanvas.RULER_MARKING_LENGTH
+    )
     for (let i = 0; i < this.virtualHeight; i += this.rulerSpacing.y) {
-      const lineStart = this.virtualToElementCoords(new Point(0, i))
-      const lineEnd = this.virtualToElementCoords(new Point(0 - markingLengthY, i))
+      // Markings
+      const markStart = this.virtualToElementCoords(new Point(1, i))
+      const markEnd = this.virtualToElementCoords(
+        new Point(0 - markingLengthY, i)
+      )
 
       this.drawLine(
-        lineStart,
-        lineEnd
+        markStart,
+        markEnd
       )
       this.drawText(
-        i.toString(),
-        new Point(lineEnd.x - 4, lineEnd.y),
-        'right'
+        (Math.round(i * 100) / 100).toString(),
+        new Point(markEnd.x - 4, markEnd.y),
+        { textAlign: 'right'}
+      )
+
+      // Lines
+      if (i) {
+        const lineEnd = this.virtualToElementCoords(new Point(this.virtualWidth, i))
+        this.drawLine(
+          markStart,
+          lineEnd,
+          { color: GraphCanvas.COLOR_MAIN_SOFT }
+        )
+      }
+    }
+
+    // Draw function lines
+    const pointSequence = [this.pStart, this.p1, this.p2, this.pEnd]
+    pointSequence.map(p => this.virtualToElementCoords(p))
+      .reduce((a, b) => {
+        this.drawLine(a, b, { color: GraphCanvas.COLOR_MAIN, lineWidth: 2 })
+        return b
+      })
+
+    // Draw edges
+    this.drawLine(
+      this.virtualToElementCoords(new Point(0, 0)),
+      this.virtualToElementCoords(new Point(this.virtualWidth, 0)),
+      { color: 'black' }
+    )
+    this.drawLine(
+      this.virtualToElementCoords(new Point(0, 0)),
+      this.virtualToElementCoords(new Point(0, this.virtualHeight)),
+      { color: 'black' }
+    )
+
+    // Draw snapped point
+    if (this.lineSnappedCursor !== null) {
+      this.drawPointCircle(
+        this.lineSnappedCursor,
+        {
+          radius: GraphCanvas.POINT_CIRCLE_RADIUS,
+          color: GraphCanvas.COLOR_MAIN_MID
+        }
       )
     }
+
+    // Draw points
+    const colors = [
+      this.highlightedPoint === 'p1'
+        ? GraphCanvas.COLOR_HIGHLIGHT
+        : GraphCanvas.COLOR_MAIN,
+      this.highlightedPoint === 'p2'
+        ? GraphCanvas.COLOR_HIGHLIGHT
+        : GraphCanvas.COLOR_MAIN
+    ]
+
+    this.drawPointCircle(
+      this.virtualToElementCoords(this.p1),
+      { radius: GraphCanvas.POINT_CIRCLE_RADIUS, color: colors[0] }
+    )
+    this.drawPointCircle(
+      this.virtualToElementCoords(this.p2),
+      { radius: GraphCanvas.POINT_CIRCLE_RADIUS, color: colors[1] }
+    )
 
     // const endOfXRuler = this.virtualToElementCoords(new Point(this.virtualWidth, 0))
     // const endOfYRuler = this.virtualToElementCoords(new Point(0, this.virtualHeight))
 
+    const viewportCoords = this.virtualToElementCoords(new Point(this.virtualWidth, 0))
     this.drawText(
-      `(${this.cssUnitViewport})`,
-      new Point(
-        this.boundingRect.width,
-        this.boundingRect.height - GraphCanvas.MARGIN_BOTTOM + 8
-      ),
-      'right'
+      `(${this.cssUnitGrowth})`,
+      new Point(viewportCoords.x + 10, viewportCoords.y),
+      { textAlign: 'left', font: 'bold 12px sans-serif' }
     )
 
     this.drawText(
       `(${this.cssUnitSize})`,
       new Point(
         GraphCanvas.MARGIN_LEFT,
-        8
+        14
       ),
-      'right'
+      { textAlign: 'right', font: 'bold 12px sans-serif' }
     )
+
+    // Draw info label
+    if (this.lineSnappedCursor || this.highlightedPoint) {
+      const SPACING = 5
+      const FONT_SIZE = 14
+
+      const origin = this.lineSnappedCursor
+        ? this.lineSnappedCursor
+        : this.virtualToElementCoords(this[this.highlightedPoint || 'p1'])
+
+      // const labelVirtualWidth = GraphCanvas.INFO_LABEL_WIDTH
+      // const labelVirtualHeight = GraphCanvas.INFO_LABEL_HEIGHT
+      const totalWidth = GraphCanvas.INFO_LABEL_WIDTH
+        + GraphCanvas.POINT_CIRCLE_RADIUS
+        // + SPACING
+      const totalHeight = GraphCanvas.INFO_LABEL_HEIGHT
+        + GraphCanvas.POINT_CIRCLE_RADIUS
+        + SPACING
+
+      // Should be drawn in the order:
+      // Top Left > Top Right > Bottom Left > Bottom Right
+      const isLeftSpace = origin.x - totalWidth
+        > this.virtualToElementCoords(new Point(0, 0)).x
+      const isTopSpace = origin.y - totalHeight
+        > this.virtualToElementCoords(new Point(0, this.virtualHeight)).y
+
+      const topLeft = new Point(
+        !isLeftSpace ? origin.x /*+ SPACING * 2*/ : origin.x - totalWidth,
+        !isTopSpace ? origin.y + SPACING * 2 : origin.y - totalHeight
+      )
+
+      // Box
+      // const boxCoordinates = new Point(
+      //   !isLeftSpace
+      //     ? origin.x /*+ SPACING * 2*/
+      //     : origin.x - totalWidth,
+      //   !isTopSpace
+      //     ? origin.y + SPACING * 2
+      //     : origin.y - totalHeight
+      // )
+
+      this.drawRect(
+        topLeft,
+        GraphCanvas.INFO_LABEL_WIDTH,
+        GraphCanvas.INFO_LABEL_HEIGHT,
+        'rgba(0, 0, 0, 0.7)'
+      )
+
+      // Texts
+      const DISTANCE = 3
+
+      const textXLeft = topLeft.x + FONT_SIZE / 2
+      const textXRight = topLeft.x
+        + GraphCanvas.INFO_LABEL_WIDTH
+        - FONT_SIZE / 2
+
+      const textTopY = topLeft.y
+        + (GraphCanvas.INFO_LABEL_HEIGHT / 2)
+        - FONT_SIZE / 5
+        - DISTANCE
+      const textBottomY = topLeft.y
+        + (GraphCanvas.INFO_LABEL_HEIGHT / 2)
+        + FONT_SIZE
+        + DISTANCE
+
+      const units = this.elementToVirtualCoords(origin)
+
+      // Unit names
+      this.drawText(
+        `Viewport:`,
+        new Point(textXLeft, textTopY),
+        {
+          color: GraphCanvas.COLOR_BACKGROUND,
+          font: `bold ${FONT_SIZE}px sans-serif`
+        }
+      )
+      this.drawText(
+        `Size:`,
+        new Point(textXLeft, textBottomY),
+        {
+          color: GraphCanvas.COLOR_BACKGROUND,
+          font: `bold ${FONT_SIZE}px sans-serif`
+        }
+      )
+      
+      // Values
+      this.drawText(
+        `${Math.round(units.x * 10) / 10}${this.cssUnitGrowth}`,
+        new Point(textXRight, textTopY),
+        {
+          color: GraphCanvas.COLOR_BACKGROUND,
+          font: `${FONT_SIZE}px sans-serif`,
+          textAlign: 'right'
+        }
+      )
+      this.drawText(
+        `${Math.round(units.y * 100) / 100}${this.cssUnitSize}`,
+        new Point(textXRight, textBottomY),
+        {
+          color: GraphCanvas.COLOR_BACKGROUND,
+          font: `${FONT_SIZE}px sans-serif`,
+          textAlign: 'right'
+        }
+      )
+    }
   }
 
-  public set onChange(cb: (newData: Partial<StateObject>) => void) {
-    this.changeListener = cb
-  }
-
+  /**
+   * Redraws the canvas only when the display rerenders
+   */
   public refresh() {
     // Only run if refresh hasn't been triggered at current tick
     if (!this.isRefreshTriggered) {
@@ -925,6 +1312,21 @@ export default class GraphCanvas{
     }
   }
 
+  /**
+   * Sets a listener for changes in the graph
+   * 
+   * The argument passed to the callback is a state object containing only the
+   * modified data
+   */
+  public set onChange(cb: (newData: Partial<StateObject>) => void) {
+    this.changeListener = cb
+  }
+
+  /**
+   * Updates the graph with new data
+   * 
+   * @param {StateObject} newDataObject The new data
+   */
   public update(newDataObject: StateObject) {
     if ('isClampedMin' in newDataObject) {
       this.isClampedMin = newDataObject.isClampedMin
@@ -949,7 +1351,7 @@ export default class GraphCanvas{
       this.cssUnitSize = newDataObject.sizeUnit
     }
     if ('viewportUnit' in newDataObject) {
-      this.cssUnitViewport = newDataObject.viewportUnit
+      this.cssUnitGrowth = newDataObject.viewportUnit
     }
 
     this.refresh()

@@ -20,24 +20,49 @@ body{
 
 .form-input{
   height: 100vh;
-  overflow-y: auto;
+  overflow-y: overlay;
   font-size: 1.6rem;
 }
 @media(min-width: 768px) {
   .form-input{
-    width: 38.2%;
+    /* width: 4; */
+    width: 36.6rem;
     float: left;
     /* display: inline-block; */
     /* background-color: #f0f0f0; */
+  }
+  
+  .css-output{
+    margin: 1rem 0;
+  }
+
+  .graph{
+    /* padding: 2rem 0; */
   }
 
   .graph,
   .css-output{
     /* float: left; */
-    width: 61%;
     display: inline-block;
-    margin: 3rem 0 1rem;
   }
+  .css-output{
+    width: 61%;
+  }
+}
+
+.css-output__text{
+  font-size: 1.8rem;
+  line-height: 3.6rem;
+
+  padding: 2rem;
+  /* background-color: #6D6D6D;
+  color: white; */
+
+  overflow-x: auto;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
 }
 
 /* Fieldsets --- */
@@ -224,7 +249,8 @@ input[type="text"]{
 #conversion-rate{
   width: 8.5rem;
 }
-#property-name{
+#property-name,
+#selector-name{
   width: 19.7rem;
 }
 
@@ -292,14 +318,12 @@ input[type="text"]{
 .measure-icons svg{
   height: 3rem;
   width: 3rem;
-  margin: .9rem 0 .3rem;
+  margin: .9rem 0 .1rem;
 }
 
 input[type="radio"]{
   position: absolute;
-  left: -999999999rem;
-  top: -999999999rem;
-  opacity: 0;
+  visibility: hidden;
 }
 input[type="radio"] + label{
   /* position: relative; */
@@ -351,7 +375,7 @@ input[type="radio"] + label:last-of-type{
   width: 100%;
 }
 .checkbox-label-pair > label{
-  width: 60%;
+  /* width: 60%; */
 }
 input[type="checkbox"]{
   min-width: 2rem;

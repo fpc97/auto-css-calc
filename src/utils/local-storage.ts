@@ -1,47 +1,64 @@
-import { CSSSizeUnits, CSSViewportUnits, StateObject } from "../ts"
+import { StateObject } from "../ts"
+
+const defaultData: StateObject = {
+  sizes: [[200, 16], [400, 21]],
+  sizeUnit: 'px',
+  viewportUnit: 'px',
+  followConversion: false,
+  conversionRate: 16,
+  growthUnit: 'vw',
+  useProperty: false,
+  propertyName: 'font-size',
+  useSelector: false,
+  selectorOutside: false,
+  selectorName: '.container',
+  isClampedMin: false,
+  isClampedMax: false,
+  clampMethod: 'media-query'
+}
+Object.seal(defaultData)
+
+const dataKeys = Object.keys(defaultData) as Array<keyof StateObject>
+
+export function retrieveDefaultData(): StateObject {
+  return defaultData
+}
 
 export function retrieveLocalData(): StateObject | null {
   try {
-    const sizeUnit = <CSSSizeUnits>localStorage.getItem('sizeUnit')
-  
-    if (sizeUnit === null) {
-      return null
-    }
-  
-    const viewportUnit = <CSSViewportUnits>localStorage.getItem('viewportUnit')
-    const size1 = <string>localStorage.getItem('size1')
-    const size2 = <string>localStorage.getItem('size2')
-    const viewport1 = <string>localStorage.getItem('viewport1')
-    const viewport2 = <string>localStorage.getItem('viewport2')
-    const toPxConversion = <string>localStorage.getItem('toPxConversion')
-    const isClampedMin = <string>localStorage.getItem('isCLampedMin')
-    const isClampedMax = <string>localStorage.getItem('isCLampedMax')
-  
-    return {
-      sizeUnit,
-      viewportUnit,
-      sizes: [
-        [parseFloat(viewport1), parseFloat(size1)],
-        [parseFloat(viewport2), parseFloat(size2)]
-      ],
-      toPxConversion: parseFloat(toPxConversion),
-      isClampedMin: (isClampedMin === 'true'),
-      isClampedMax: (isClampedMax === 'true')
-    }
+    let missingData = false
+
+    const retrievedDataEntries = dataKeys.map(dataName => {
+      const dataRaw = localStorage.getItem(dataName)
+
+      if (dataRaw === null) {
+        missingData = true
+      }
+
+      const dataParsed = dataRaw === null || typeof defaultData[dataName] === 'string'
+        ? dataRaw
+        : JSON.parse(dataRaw)
+      
+      return [dataName, dataParsed]
+    })
+
+    return missingData ? null : Object.fromEntries(retrievedDataEntries)
   } catch(e) {
-    console.error('There was an error fetching the local data')
+    console.error('There was an error retrieving data from localStorage', e)
     return null
   }
 }
 
-export function saveLocalData(data: StateObject) {
-  localStorage.setItem('sizeUnit', data.sizeUnit)
-  localStorage.setItem('viewportUnit', data.viewportUnit)
-  localStorage.setItem('viewport1',data.sizes[0][0].toString())
-  localStorage.setItem('viewport2',data.sizes[1][0].toString())
-  localStorage.setItem('size1', data.sizes[0][1].toString())
-  localStorage.setItem('size2',data.sizes[1][1].toString())
-  localStorage.setItem('toPxConversion', data.toPxConversion.toString())
-  localStorage.setItem('isCLampedMin', data.isClampedMin.toString())
-  localStorage.setItem('isCLampedMax', data.isClampedMax.toString())
+export function saveLocalData(newData: StateObject) {
+  try {
+    dataKeys.map(dataName => {
+      const dataString = typeof newData[dataName] === 'object'
+        ? JSON.stringify(newData[dataName])
+        : newData[dataName].toString()
+  
+      localStorage.setItem(dataName, dataString)
+    })
+  } catch(e) {
+    console.error('There was an error saving data to localStorage', e)
+  }
 }

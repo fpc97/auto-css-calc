@@ -1,25 +1,49 @@
 import { StateObject } from "./ts"
+import { compareProps } from "./utils"
 import { Calc } from "./utils/calc"
+import { LinearFunction } from "./lib/linear-algebra"
 
 const baseDOMElement = document.getElementById('css-output')
 if (typeof baseDOMElement === 'undefined') {
   throw new Error()
 }
 
-// function writeCalc<Content extends string>(content: Content): `calc(${Content})` {
-//   return `calc(${content})`
-// }
+const calcObject = new Calc()
 
 function update(newData: StateObject) {
   if (baseDOMElement === null) {
     return
   }
+  const { sizes: [[x1, y1], [x2, y2]] } = newData
 
-  const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
+  // Update linear function
+  const prevLF = calcObject.linearFunction
+  const isLFChanged = !prevLF
+    || prevLF.getYFromX(x1) !== y1
+    || prevLF.getYFromX(x2) !== y2
+  if (isLFChanged) {
+    calcObject.linearFunction = new LinearFunction(
+      {x: x1, y: y1},
+      {x: x2, y: y2}
+    )
+  }
 
-  const calc = new Calc(newData.sizes[0], newData.sizes[1], newData.sizeUnit, newData.viewportUnit)
+  // Update config
+  const isConfigChanged = !calcObject.config
+    || !compareProps(newData, calcObject.config, [
+      'sizeUnit', 'viewportUnit', 'growthUnit', 'useProperty',
+      'useSelector', 'selectorOutside', 'selectorName', 'isClampedMin',
+      'isClampedMax', 'clampMethod'
+    ])
+  if (isConfigChanged) {
+    calcObject.config = {...newData}
+  }
 
-  text.textContent = calc.render()
+  // If linear function or config were updated re-render
+  if (isLFChanged || isConfigChanged) {
+    const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
+    text.textContent = calcObject.render()
+  }
 }
 
 export default {

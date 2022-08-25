@@ -13,8 +13,8 @@
         <fieldset class="blue">
           <legend class="invisible">Values</legend>
           <div class="measure-icons">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 42"><path d="M116 5v32a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h11v21h6V0h11v9h6V0h15v9h6V0h13v9h6V0h14v21h6V0h12a5 5 0 0 1 5 5Z"/></svg>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 90"><path d="M111 0H5a5 5 0 0 0-5 5v62a5 5 0 0 0 5 5h106a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5ZM94 38v-9H22v9L11 27l11-11v9h72v-9l11 11Z"/><path d="M42 65h32v17H42z"/><path d="M28 79h60v11H28z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 42"><path d="M116 5v32a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h11v21h6V0h11v9h6V0h15v9h6V0h13v9h6V0h14v21h6V0h12a5 5 0 0 1 5 5Z"/></svg>
           </div><!--
           --><div class="size-pair">
             <label>
@@ -64,7 +64,7 @@
           <legend class="form-input__legend">Output options</legend>
           <fieldset>
             <legend>Extend along</legend>
-            <input type="radio" name="growth-unit" value="vw" id="vw"><!--
+            <input type="radio" name="growth-unit" value="vw" id="vw" checked><!--
             --><label for="vw">Width</label><!--
             --><input type="radio" name="growth-unit" value="vh" id="vh"><!--
             --><label for="vh">Height</label>
@@ -77,28 +77,42 @@
           <input type="text" name="property-name" id="property-name" value="font-size" disabled><!--
           --><label for="property-name">Property name</label>
           <br/>
+          
+          <div class="checkbox-label-pair">
+            <input type="checkbox" name="use-selector" id="use-selector">
+            <label for="use-selector">Use selector</label>
+          </div>
+          <div class="checkbox-label-pair">
+            <input type="checkbox" name="selector-outside" id="selector-outside" disabled>
+            <label for="selector-outside" title="Valid syntax in some preprocessors like Sass">Selector out<br/> of media query</label>
+          </div>
+          <br />
+          <input type="text" name="selector-name" id="selector-name" value=".container" disabled><!--
+          --><label for="selector-name">Selector name</label>
+          <br/>
+
           <div class="checkbox-label-pair">
             <input type="checkbox" name="is-clamped-min" id="is-clamped-min">
-            <label for="is-clamped-min">Clamp at min size</label>
+            <label for="is-clamped-min">Clamp at<br/> min size</label>
           </div><!--
           --><div class="checkbox-label-pair">
             <input type="checkbox" name="is-clamped-max" id="is-clamped-max">
-            <label for="is-clamped-max">Clamp at max size</label>
+            <label for="is-clamped-max">Clamp at<br/> max size</label>
           </div>
           <fieldset class="disabled">
             <legend>Method</legend>
-            <input type="radio" name="clamp-method" value="px" id="media-query" disabled><!--
+            <input type="radio" name="clamp-method" value="media-query" id="media-query" disabled checked><!--
             --><label for="media-query">Media query</label><!--
-            --><input type="radio" name="clamp-method" value="rem" id="min-max" disabled><!--
+            --><input type="radio" name="clamp-method" value="min-max" id="min-max" disabled><!--
             --><label for="min-max">Min-max</label><!--
-            --><input type="radio" name="clamp-method" value="em" id="clamp" disabled><!--
+            --><input type="radio" name="clamp-method" value="clamp" id="clamp" disabled><!--
             --><label for="clamp">Clamp</label>
           </fieldset>
         </fieldset>
       </form>
-      <canvas class="graph" id="graph" width="600" height="250"></canvas>
+      <canvas class="graph" id="graph" width="594" height="296"></canvas>
       <div class="css-output" id="css-output">
-        <p class="css-output__text"></p>
+        <pre class="css-output__text"></pre>
       </div>
       <!-- <div class="sample" id="sample"></div> -->
       <script type="module" src="/src/main.ts"></script>
