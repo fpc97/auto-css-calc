@@ -30,6 +30,7 @@ function update(newData: StateObject) {
 
   // Update config
   const isConfigChanged = !calcObject.config
+    || isLFChanged
     || !compareProps(newData, calcObject.config, [
       'sizeUnit', 'viewportUnit', 'growthUnit', 'useProperty',
       'useSelector', 'selectorOutside', 'selectorName', 'isClampedMin',
@@ -42,7 +43,7 @@ function update(newData: StateObject) {
   // If linear function or config were updated re-render
   if (isLFChanged || isConfigChanged) {
     const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
-    text.textContent = calcObject.render()
+    text.innerHTML = calcObject.render()
   }
 }
 

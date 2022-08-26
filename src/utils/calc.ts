@@ -1,15 +1,22 @@
 import { removeTrailingZeros, compose } from ".";
 import { StateObject } from "../ts";
 import { LinearFunction } from "../lib/linear-algebra";
+import { renderSpanClass } from "./dom";
 
 /**
  * Class representing an object that renders a CSS calc() function
  */
 export class Calc{
-  private _config: StateObject | null
+  private static readonly CLASSNAME_FUNCTION = 'func';
+  private static readonly CLASSNAME_AT_RULE = 'at-rule';
+  private static readonly CLASSNAME_SELECTOR = 'selec';
+  private static readonly CLASSNAME_PROPERTY = 'prop';
+  private static readonly CLASSNAME_VALUE = 'val';
+
+  private _config: StateObject | null;
   // private incrementPercentage: number
   
-  private _linearFunction: LinearFunction | null
+  private _linearFunction: LinearFunction | null;
 
   /**
    * Create new calc object
@@ -45,7 +52,11 @@ export class Calc{
    * @returns {string} The resulting property
    */
   private renderProperty(content: string) {
-    return `${this.config?.propertyName}: ${content};`
+    return `${
+      renderSpanClass(this.config?.propertyName || '', Calc.CLASSNAME_PROPERTY)
+    }: ${
+      content
+    };`
   }
 
   /**
@@ -55,7 +66,9 @@ export class Calc{
    * @returns {string} The resulting CSS selector
    */
   private renderSelector(content: string) {
-    return `${this.config?.selectorName} {${content}}`
+    return `${
+      renderSpanClass(this.config?.selectorName || '', Calc.CLASSNAME_SELECTOR)
+    } {${content}}`
   }
 
   /**
@@ -64,8 +77,32 @@ export class Calc{
    * @param {string} content CSS to be contained by this element
    * @returns {string} The resulting media query
    */
-  private renderMediaQueryMin(content: string) {
-    return `@media(min-width: ${this.config?.sizes[0][1]}) {${content}}`
+  // private renderMediaQueryMin(content: string) {
+  //   return `${
+  //     renderSpanClass('@media', Calc.CLASSNAME_AT_RULE)
+  //   } (${
+  //     renderSpanClass('min-width', Calc.CLASSNAME_SELECTOR)
+  //   }: ${
+  //     renderSpanClass(
+  //       (this.config?.sizes[0][1].toString() || '')
+  //       + (this.config?.growthUnit || ''),
+  //       Calc.CLASSNAME_VALUE)
+  //   }) {${content}}`
+  // }
+
+  private renderMediaQuery(content: string, max: boolean = false) {
+    const size = max ? this.config?.sizes[1][0] : this.config?.sizes[0][0]
+
+    return `${
+      renderSpanClass('@media', Calc.CLASSNAME_AT_RULE)
+    } (${
+      renderSpanClass('min-width', Calc.CLASSNAME_PROPERTY)
+    }: ${
+      renderSpanClass(
+        (size?.toString() || '')
+        + (this.config?.sizeUnit || ''),
+        Calc.CLASSNAME_VALUE)
+    }) {${content}}`
   }
   
   /**
@@ -74,8 +111,24 @@ export class Calc{
    * @param {string} content CSS to be contained by this element
    * @returns {string} The resulting media query
    */
+  // private renderMediaQueryMax(content: string) {
+  //   return `${
+  //     renderSpanClass('@media', Calc.CLASSNAME_AT_RULE)
+  //   } (${
+  //     renderSpanClass('min-width', Calc.CLASSNAME_SELECTOR)
+  //   }: ${
+  //     renderSpanClass(
+  //       (this.config?.sizes[1][1].toString() || '')
+  //       + (this.config?.growthUnit || ''),
+  //       Calc.CLASSNAME_VALUE)
+  //   }) {${content}}`
+  // }
+
+  private renderMediaQueryMin(content: string) {
+    return this.renderMediaQuery(content, false)
+  }
   private renderMediaQueryMax(content: string) {
-    return`@media(min-width: ${this.config?.sizes[1][1]}) {${content}}`
+    return this.renderMediaQuery(content, true)
   }
 
   /**
@@ -87,7 +140,7 @@ export class Calc{
    * @param {string} content CSS to be contained by this element
    * @returns {string} The resulting media query
    */
-  private renderMediaQueries(content: string) {
+  private renderMediaQueries() {
     // Media queries
     const isSelectorInside = this.config?.useSelector
       && !this.config?.selectorOutside
@@ -96,16 +149,25 @@ export class Calc{
         .bind(this)
       : this.renderProperty.bind(this)
 
-    const minVal = renderVals(`${
-        this.config?.sizes[0][0]
-      }${
-        this.config?.sizeUnit
-      }`)
-    const maxVal = renderVals(`${
-        this.config?.sizes[0][0]
-      }${
-        this.config?.sizeUnit
-      }`)
+    const minVal = renderVals(
+        renderSpanClass(`${
+          this.config?.sizes[0][1]
+        }${
+          this.config?.sizeUnit
+        }`,
+        `${Calc.CLASSNAME_VALUE}`
+      )
+    )
+    const maxVal = renderVals(
+      renderSpanClass(
+        `${
+          this.config?.sizes[1][1]
+        }${
+          this.config?.sizeUnit
+        }`,
+        `${Calc.CLASSNAME_VALUE}`
+      )
+    )
     const calc = renderVals(this.renderCalc())
 
     let cssOutput = ''
@@ -133,12 +195,36 @@ export class Calc{
   private renderMinMax(content: string) {
     let css = content
 
+    const minVal = renderSpanClass(`${
+      this.config?.sizes[0][0]
+    }${
+      this.config?.sizeUnit
+    }`, Calc.CLASSNAME_VALUE)
+
+    const maxVal = renderSpanClass(`${
+      this.config?.sizes[1][0]
+    }${
+      this.config?.sizeUnit
+    }`, Calc.CLASSNAME_VALUE)
+
     if (this.config?.isClampedMin) {
-      css = `max(${this.config?.sizes[0][0]}${this.config?.sizeUnit}, ${css})`
+      css = `${
+        renderSpanClass('max', Calc.CLASSNAME_FUNCTION)
+      }(${
+        minVal
+      }, ${
+        css
+      })`
     }
 
     if (this.config?.isClampedMax) {
-      css = `min(${css}, ${this.config?.sizes[1][0]}${this.config?.sizeUnit})`
+      css = `${
+        renderSpanClass('min', Calc.CLASSNAME_FUNCTION)
+      }(${
+        css
+      }, ${
+        maxVal
+      })`
     }
 
     return css
@@ -204,7 +290,15 @@ export class Calc{
       }`
       : 'auto'
 
-    return `clamp(${minSize}, ${growthFunction}, ${maxSize})`
+    return `${
+      renderSpanClass('clamp', Calc.CLASSNAME_FUNCTION)
+    }(${
+      renderSpanClass(minSize, Calc.CLASSNAME_VALUE)
+    }, ${
+      renderSpanClass(growthFunction, Calc.CLASSNAME_VALUE)
+    }, ${
+      renderSpanClass(maxSize, Calc.CLASSNAME_VALUE)
+    })`
   }
 
   /**
@@ -215,7 +309,11 @@ export class Calc{
   private renderCalc() {
     const growthFunction = this.renderGrowthFunction()
 
-    return `calc(${growthFunction})`
+    return `${
+      renderSpanClass('calc', Calc.CLASSNAME_FUNCTION)
+    }(${
+      renderSpanClass(growthFunction, Calc.CLASSNAME_VALUE)
+    })`
   }
 
   /**
@@ -225,6 +323,14 @@ export class Calc{
    * @returns {string} CSS code with corresponding line breaks and indentations
    */
   private indentCSS(cssCode: string) {
+    console.log(this.config?.clampMethod)
+
+    if (
+      !(this.config?.useSelector || this.config?.clampMethod === 'media-query')
+    ) {
+      return cssCode
+    }
+
     let i = 0
     let indentN = 0
     let parsedCSS = ''
@@ -248,13 +354,13 @@ export class Calc{
         lineBreak = true
       }
 
-      // 3. (yes, last) Apply indentation if newLine
+      // 3. (Yes, last) Apply indentation if newLine
       if (newLine) {
         char = '\t'.repeat(indentN) + char
         newLine = false
       }
 
-      // 2. Apply linebreak
+      // 2. Close current line span, apply linebreak, open new line span
       if (lineBreak) {
         newLine = lineBreak
         char += '\n'

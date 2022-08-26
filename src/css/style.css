@@ -53,6 +53,8 @@ body{
 .css-output__text{
   font-size: 1.8rem;
   line-height: 3.6rem;
+  /* font-weight: bold; */
+  font-weight: 600;
 
   padding: 2rem;
   /* background-color: #6D6D6D;
@@ -63,6 +65,29 @@ body{
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
+}
+
+.css-output__text .mb{
+  padding-bottom: 2rem;
+  /* line-height: 3rem; */
+  display: inline-block;
+}
+
+.css-output__text .func{
+  /* background-color: rgba(251, 255, 0, 0.3); */
+  color: #E35548;
+}
+.css-output__text .at-rule{
+  color: #2D6BF2;
+}
+.css-output__text .selec{
+  color: #34363E;
+}
+.css-output__text .prop{
+  color: #A321A1;
+}
+.css-output__text .val{
+  color: #5CA75B;
 }
 
 /* Fieldsets --- */
