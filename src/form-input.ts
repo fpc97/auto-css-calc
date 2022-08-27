@@ -165,6 +165,7 @@ namespace SetAvailable{
 //   }
 // }
 
+
 function applyChangedFields(e: Event) {
   const newDataObject = <StateObject>{}
   const prevData = model.isInitialized && model.get && JSON.parse(JSON.stringify(model.get()))
@@ -175,7 +176,7 @@ function applyChangedFields(e: Event) {
 
   formInputElements.forEach(([name, inputElement]) => {
     const inputValue = inputElement.value
-    const inputIsChecked = inputElement.checked
+    const isInputChecked = inputElement.checked
     const camelCaseName = <keyof StateObject>kebabToCamelCase(name)
 
     let applyChanges = false
@@ -226,14 +227,14 @@ function applyChangedFields(e: Event) {
       case 'selector-outside':
       case 'is-clamped-min':
       case 'is-clamped-max':
-        applyChanges = inputIsChecked !== prevData[camelCaseName]
+        applyChanges = isInputChecked !== prevData[camelCaseName]
         if (applyChanges) {
-          Object.defineProperty(newDataObject, camelCaseName, { value: inputIsChecked, enumerable: true })
+          Object.defineProperty(newDataObject, camelCaseName, { value: isInputChecked, enumerable: true })
         }
         break
       case 'growth-unit':
       case 'clamp-method':
-        if (!inputIsChecked) {
+        if (!isInputChecked) {
           break
         }
       case 'viewport-unit':
@@ -467,7 +468,31 @@ function handleInputDependency(this: HTMLFormElement, e: Event) {
 // form.addEventListener('change', handleInputDependency)
 // form.addEventListener('change', applyChangedFields)
 
+function modifyViewportIcon(this: HTMLFormElement, e: Event) {
+  if (!model.isInitialized || !model.get) {
+    return
+  }
+  
+  const prevData = model.get()
+
+  if (this['growth-unit'].value !== prevData.growthUnit) {
+    const monitorTall = document.getElementById('monitor-tall')
+    const monitorWide = document.getElementById('monitor-wide')
+
+    if (!monitorTall || !monitorWide) return
+
+    monitorTall.style.display = this['growth-unit'].value === 'vw'
+      ? 'inline-block'
+      : 'none'
+    monitorWide.style.display = this['growth-unit'].value === 'vh'
+      ? 'inline-block'
+      : 'none'
+  }
+}
+// form.addEventListener('change', modifyViewportIcon)
+
 form.addEventListener('change', function(e: Event) {
+  modifyViewportIcon.call(this, e)
   handleInputDependency.call(this, e)
   applyChangedFields.call(this, e)
 })

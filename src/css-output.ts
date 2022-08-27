@@ -42,8 +42,9 @@ function update(newData: StateObject) {
 
   // If linear function or config were updated re-render
   if (isLFChanged || isConfigChanged) {
-    const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
-    text.innerHTML = calcObject.render()
+    // const text = baseDOMElement.getElementsByClassName('css-output__text')[0]
+    // text.innerHTML = calcObject.render()
+    baseDOMElement.innerHTML = calcObject.render()
   }
 }
 

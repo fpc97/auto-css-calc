@@ -14,18 +14,25 @@ body{
 }
 
 .wrapper{
-  max-width: 96rem;
+  width: 77rem;
   margin: 0 auto;
 }
 
+@media(min-width: 1280px) {
+  .wrapper{
+    width: auto;
+    max-width: 115rem;
+  }
+}
+
 .form-input{
-  height: 100vh;
   overflow-y: overlay;
   font-size: 1.6rem;
 }
-@media(min-width: 768px) {
+@media(min-width: 1280px) {
   .form-input{
     /* width: 4; */
+    min-height: 100vh;
     width: 36.6rem;
     float: left;
     /* display: inline-block; */
@@ -38,6 +45,7 @@ body{
 
   .graph{
     /* padding: 2rem 0; */
+    margin-left: 1rem;
   }
 
   .graph,
@@ -46,19 +54,29 @@ body{
     display: inline-block;
   }
   .css-output{
-    width: 61%;
+    /* width: 68%; */
+    width: 77rem;
+    margin-left: 1rem;
   }
 }
 
-.css-output__text{
+.css-output{
   font-size: 1.8rem;
   line-height: 3.6rem;
   /* font-weight: bold; */
-  font-weight: 600;
+  /* font-weight: 600; */
 
   padding: 2rem;
   /* background-color: #6D6D6D;
   color: white; */
+  color: rgb(171, 174, 181);
+
+  border-radius: 1rem;
+
+  background-color: #f0f0f0;
+  /* border: 2px solid #0e3164; */
+  /* box-shadow: 0 15px 15px rgba(0, 0, 0, .2); */
+  margin-top: 3rem;
 
   overflow-x: auto;
 
@@ -67,27 +85,27 @@ body{
   tab-size: 4;
 }
 
-.css-output__text .mb{
+.css-output .mb{
   padding-bottom: 2rem;
   /* line-height: 3rem; */
   display: inline-block;
 }
 
-.css-output__text .func{
-  /* background-color: rgba(251, 255, 0, 0.3); */
-  color: #E35548;
+.css-output .func{
+  color: rgb(39, 129, 214);
+  font-weight: bold;
 }
-.css-output__text .at-rule{
-  color: #2D6BF2;
+.css-output .at-rule{
+  color: rgb(166, 38, 164);       /* OK */
 }
-.css-output__text .selec{
-  color: #34363E;
+.css-output .selec{
+  color: rgb(66, 54, 71);       /* OK */
 }
-.css-output__text .prop{
-  color: #A321A1;
+.css-output .prop{
+  color: rgb(64, 120, 242);       /* OK */
 }
-.css-output__text .val{
-  color: #5CA75B;
+.css-output .val{
+  color: rgb(56, 58, 66);       /* OK */
 }
 
 /* Fieldsets --- */

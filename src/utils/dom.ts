@@ -7,7 +7,3 @@
 export function renderSpanClass(content: string, className?: string) {
   return `<span${className ? ` class="${className}"` : ''}>${content}</span>`
 }
-
-export function renderDivBlock(content: string) {
-  return `<span class='block'>${content}</span>`
-}

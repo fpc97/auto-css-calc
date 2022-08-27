@@ -323,8 +323,6 @@ export class Calc{
    * @returns {string} CSS code with corresponding line breaks and indentations
    */
   private indentCSS(cssCode: string) {
-    console.log(this.config?.clampMethod)
-
     if (
       !(this.config?.useSelector || this.config?.clampMethod === 'media-query')
     ) {
@@ -404,6 +402,7 @@ export class Calc{
 
     // 2. CSS Property
     if (this.config.useProperty) {
+      console.log('PROPO')
       operations.push(this.renderProperty)
     }
 
@@ -413,7 +412,11 @@ export class Calc{
     }
 
     // 4. Media query
-    if (this.config.clampMethod === 'media-query') {
+    if (
+      (this.config.isClampedMin
+      || this.config.isClampedMax)
+      && this.config.clampMethod === 'media-query'
+    ) {
       operations.push(this.renderMediaQueries)
     }
 
@@ -421,6 +424,8 @@ export class Calc{
     if (this.config.useSelector && this.config.selectorOutside) {
       operations.push(this.renderSelector)
     }
+
+    console.log(operations)
 
     return compose.call(this, ...operations.reverse())()
   }

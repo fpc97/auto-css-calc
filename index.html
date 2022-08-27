@@ -13,7 +13,8 @@
         <fieldset class="blue">
           <legend class="invisible">Values</legend>
           <div class="measure-icons">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 90"><path d="M111 0H5a5 5 0 0 0-5 5v62a5 5 0 0 0 5 5h106a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5ZM94 38v-9H22v9L11 27l11-11v9h72v-9l11 11Z"/><path d="M42 65h32v17H42z"/><path d="M28 79h60v11H28z"/></svg>
+            <svg id="monitor-tall" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 90"><path d="M111 0H5a5 5 0 0 0-5 5v62a5 5 0 0 0 5 5h106a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5ZM94 38v-9H22v9L11 27l11-11v9h72v-9l11 11Z"/><path d="M42 65h32v17H42z"/><path d="M28 79h60v11H28z"/></svg>
+            <svg id="monitor-wide" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 90"><path d="M42 65h32v17H42z"/><path d="M28 79h60v11H28zM111 0H5a5 5 0 0 0-5 5v62a5 5 0 0 0 5 5h106a5 5 0 0 0 5-5V5a5 5 0 0 0-5-5ZM98 52 88 63 77 52h9V20h-9L88 9l10 11h-8v32Z"/></svg>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 42"><path d="M116 5v32a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h11v21h6V0h11v9h6V0h15v9h6V0h13v9h6V0h14v21h6V0h12a5 5 0 0 1 5 5Z"/></svg>
           </div><!--
           --><div class="size-pair">
@@ -110,10 +111,11 @@
           </fieldset>
         </fieldset>
       </form>
-      <canvas class="graph" id="graph" width="594" height="296"></canvas>
-      <div class="css-output" id="css-output">
+      <canvas class="graph" id="graph" width="770" height="300"></canvas>
+      <!-- <div class="css-output" id="css-output">
         <pre class="css-output__text"></pre>
-      </div>
+      </div> -->
+      <pre class="css-output css-output__text" id="css-output"></pre>
       <!-- <div class="sample" id="sample"></div> -->
       <script type="module" src="/src/main.ts"></script>
       <script src="/src/fieldset-collapse.ts"></script>
