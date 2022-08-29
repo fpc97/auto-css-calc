@@ -127,6 +127,8 @@ body{
   top: 1rem;
   right: 1rem;
   cursor: pointer;
+  /* background-color: white;
+  border-radius: .3rem; */
 
   border: none;
   background: transparent;
@@ -138,7 +140,7 @@ body{
 .css-output-clip{
   width: 100%;
   height: 100%;
-  fill: #5c759b;
+  fill: #394f71;
 }
 
 /* Fieldsets --- */
@@ -461,4 +463,55 @@ input[type="checkbox"]{
 input[type="checkbox"] + label{
   padding-left: 1rem;
   /* width: 60%; */
+}
+
+.emitted-message{
+  display: none;
+}
+
+.emitted-message.start{
+  display: inline-block;
+  background-color: white;
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  /* transform: translateX(-50%); */
+  padding: 1rem 3rem;
+  border-radius: .3rem;
+  margin-top: 1.4rem;
+  box-shadow: 0 3.5px 8px rgba(0, 0, 0, .15);
+  z-index: 999999999999999;
+  animation: message-entrance 1.8s;
+}
+
+.emitted-message.error{
+  background-color: rgb(255, 128, 128);
+  color: white;
+}
+.emitted-message.warn{
+  background-color: rgb(229, 162, 70);
+  color: white;
+}
+
+.emitted-message-text{
+  font-size: 1.9rem;
+}
+
+@keyframes message-entrance{
+  0%{
+    opacity: 0;
+    transform: translate(-50%, -20%);
+  }
+  20%{
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  80%{
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100%{
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
 }
