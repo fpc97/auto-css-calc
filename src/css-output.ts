@@ -3,6 +3,7 @@ import { compareProps } from "./utils"
 import { Calc } from "./utils/calc"
 import { LinearFunction } from "./lib/linear-algebra"
 import { emitMessage } from "./message-emitter"
+import { copyToClipboard } from "./utils/dom"
 
 const baseDOMElement = document.getElementById('css-output')
 if (typeof baseDOMElement === 'undefined') {
@@ -49,53 +50,31 @@ function update(newData: StateObject) {
   }
 }
 
-// const ClipboardItemSaved = window.ClipboardItem
-
-// function copyToClipboard(e: Event) {
-//   console.log('CLICK')
-//   const cssCode = baseDOMElement?.textContent
-
-//   if (typeof cssCode === 'string' && cssCode.length > 0) {
-//     const type = "text/plain"
-//     const blob = new Blob([cssCode], { type })
-//     const data = [new ClipboardItemSaved({ [type]: blob })]
-
-//     navigator.clipboard.write(data)
-//   }
-// }
-
-// function emitMessage(message: string, type: 'error' | 'success' | 'warning' = 'success') {
-//   const divElement = document.createElement('div')
-//   const pElement = document.createElement('p')
-
-//   divElement.className = 'emitted-message'
-//   pElement.className = 'emitted-message-text'
-
-//   document.add
-// }
-
-async function copyToClipboard(e: Event) {
+async function copyCSS() {
   const cssCode = baseDOMElement?.textContent
 
-  try {
-    if (typeof cssCode !== 'string') {
-      throw TypeError(`Copied CSS code is incorrect type: ${typeof cssCode}`)
-    }
-
-    await navigator.clipboard.writeText(cssCode)
-
-    emitMessage('✅ CSS copied successfully!')
-  } catch (err) {
-    console.error('Failed to copy: ', err)
+  if (typeof cssCode !== 'string') {
     emitMessage(
-      'There has been an error copying the CSS code. Please try again',
+      'There has been an error copying the CSS code. Please, try again',
+      'error'
+    )
+    return
+  }
+
+  const status = await copyToClipboard(cssCode)
+
+  if (status.success) {
+    emitMessage('✅ CSS copied successfully!')
+  } else {
+    emitMessage(
+      'There has been an error copying the CSS code. Please, try again',
       'error'
     )
   }
 }
 
 document.getElementById('button-css-clipboard')
-  ?.addEventListener('click', copyToClipboard)
+  ?.addEventListener('click', copyCSS)
 
 export default {
   update

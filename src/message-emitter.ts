@@ -10,7 +10,7 @@ const possibleTypes = ['success', 'error', 'warning'] as const
 type PossibleTypes = typeof possibleTypes
 
 /**
- * Write a pop-up message that shows up at the top of the screen
+ * Show a pop-up message at the top of the screen
  * @param {string} content Content of the message
  * @param {string} type The type of message it is
  */
