@@ -402,7 +402,6 @@ export class Calc{
 
     // 2. CSS Property
     if (this.config.useProperty) {
-      console.log('PROPO')
       operations.push(this.renderProperty)
     }
 
@@ -424,8 +423,6 @@ export class Calc{
     if (this.config.useSelector && this.config.selectorOutside) {
       operations.push(this.renderSelector)
     }
-
-    console.log(operations)
 
     return compose.call(this, ...operations.reverse())()
   }

@@ -1,5 +1,5 @@
 import { StateObject } from "./ts"
-import { clamp, clampMargin, Observable } from "./utils"
+import { clamp, Observable } from "./utils"
 import { retrieveDefaultData, retrieveLocalData, saveLocalData } from "./utils/local-storage"
 
 export const MAX_SIZE = 9999
