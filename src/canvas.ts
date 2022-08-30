@@ -1,4 +1,4 @@
-import { CSSSizeUnits, CSSViewportUnits, DimensionUnitPair, StateObject } from "./ts";
+import { CSSSizeUnits, DimensionUnitPair, StateObject } from "./ts";
 import { clamp, getArrayPairsOf } from "./utils";
 import { LinearFunction, Point } from "./lib/linear-algebra";
 import { MAX_SIZE, MAX_VIEWPORT } from './store'

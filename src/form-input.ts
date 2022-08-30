@@ -166,7 +166,7 @@ namespace SetAvailable{
 // }
 
 
-function applyChangedFields(e: Event) {
+function applyChangedFields() {
   const newDataObject = <StateObject>{}
   const prevData = model.isInitialized && model.get && JSON.parse(JSON.stringify(model.get()))
 
@@ -468,7 +468,7 @@ function handleInputDependency(this: HTMLFormElement, e: Event) {
 // form.addEventListener('change', handleInputDependency)
 // form.addEventListener('change', applyChangedFields)
 
-function modifyViewportIcon(this: HTMLFormElement, e: Event) {
+function modifyViewportIcon(this: HTMLFormElement) {
   if (!model.isInitialized || !model.get) {
     return
   }
@@ -492,9 +492,9 @@ function modifyViewportIcon(this: HTMLFormElement, e: Event) {
 // form.addEventListener('change', modifyViewportIcon)
 
 form.addEventListener('change', function(e: Event) {
-  modifyViewportIcon.call(this, e)
+  modifyViewportIcon.call(this)
   handleInputDependency.call(this, e)
-  applyChangedFields.call(this, e)
+  applyChangedFields.call(this)
 })
 
 // Update
