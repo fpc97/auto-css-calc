@@ -154,6 +154,11 @@ fieldset{
 fieldset.blue + fieldset.blue{
   padding-top: 0;
 }
+@media(min-width: 770px) {
+  fieldset.round-bottom{
+    border-radius: 0 0 1rem 1rem;
+  }
+}
 
 fieldset.blue{
   background-color: #4791ff;
