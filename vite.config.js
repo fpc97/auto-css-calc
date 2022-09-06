@@ -1,5 +1,5 @@
 export default {
-  build: {
-    assetsDir: 'calc-generator'
+  server: {
+    base: '/calc-generator/'
   }
 }
