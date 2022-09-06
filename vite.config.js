@@ -1,5 +1,11 @@
 export default {
   server: {
-    base: '/calc-generator/'
+    proxy: {
+      '/calc-generator': {
+        target: 'https://fpece.com',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/calc-generator/, '')
+      }
+    }
   }
 }
