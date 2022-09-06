@@ -1,5 +1,5 @@
-export default {
-  build: {
-    base: 'https://fpece.com/calc-generator/'
-  }
-}
+import { defineConfig } from "vite"
+
+export default defineConfig({
+  base: '/calc-generator/'
+})
