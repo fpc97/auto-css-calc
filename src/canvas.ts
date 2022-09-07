@@ -190,7 +190,7 @@ export default class GraphCanvas{
   // private isExtendLooping: boolean;
 
   /** The ID of the interval in charge of the extension */
-  private extendIntervalId: number | null;
+  private extendIntervalId: ReturnType<typeof setInterval> | null;
   /** Indicates if virtual width is being extended */
   private isExtendX: boolean;
   /** Indicates if virtual height is being extended */
