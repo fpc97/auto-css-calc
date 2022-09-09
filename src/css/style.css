@@ -165,7 +165,7 @@ fieldset.blue + fieldset.blue{
 
 fieldset.blue{
   /* background-color: #4791ff; */
-  background-color: #3f4aff;
+  background-color: #5a64ff;
   color: white;
 }
 
@@ -426,7 +426,7 @@ input[type="radio"] + label{
   /* height: 100%; */
 }
 input[type="radio"]:checked + label{
-  background-color: #3f4aff;
+  background-color: #5a64ff;
   color: white;
   cursor: default;
 }
@@ -436,7 +436,7 @@ input[type="radio"]:disabled:checked + label{
   color: #bfbfbf;
 }
 input[type="radio"]:not(:disabled):checked + label:hover{
-  background-color: #3f4aff;
+  background-color: #5a64ff;
   color: white;
 }
 input[type="radio"]:not(:disabled) + label:hover{
@@ -467,7 +467,7 @@ input[type="radio"] + label:last-of-type{
 input[type="checkbox"]{
   min-width: 2rem;
   min-height: 2rem;
-  accent-color: #3f4aff;
+  accent-color: #5a64ff;
 }
 input[type="checkbox"] + label{
   padding-left: 1rem;
