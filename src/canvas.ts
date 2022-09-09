@@ -84,7 +84,7 @@ export default class GraphCanvas{
    */
   private static readonly POINT_MARGIN = 1;
   
-  private static readonly COLOR_MAIN        = '#5a64ff';
+  private static readonly COLOR_MAIN        = '#5862ff';
   private static readonly COLOR_MAIN_MID    = '#A3B6FF';
   private static readonly COLOR_MAIN_SOFT   = '#eeeeee';
   private static readonly COLOR_BACKGROUND  = '#ffffff';

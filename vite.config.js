@@ -11,7 +11,7 @@ export default defineConfig({
         name: 'Calc Generator',
         short_name: 'CalcGen',
         description: 'Tool to generate precise CSS calc() functions for fluid typographies and anything that demands for adaptable sizing',
-        theme_color: '#5a64ff',
+        theme_color: '#5862ff',
         icons: [
           {
             src: 'pwa-192x192.png',
