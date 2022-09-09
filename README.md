@@ -2,4 +2,4 @@
 
 A tool to easily create CSS calc() functions using reference points
 
-[Live demo](https://calc-generator.netlify.app)
+[Live demo](https://fpece.com/calc-generator)
